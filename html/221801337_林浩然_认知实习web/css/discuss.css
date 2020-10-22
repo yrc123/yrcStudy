@@ -1,0 +1,27 @@
+#box {
+	width:500px;
+	height:400px;
+
+	/*border:solid 1px red;
+	*/
+}
+.txt {
+	width:490px;
+	height:150px;
+	//position: relative;
+	top:30px;
+	font-size: 20px;
+	border: solid 2px #D585B4;
+}
+.pl {
+	background:antiquewhite;
+}
+.Name{
+	border: solid 2px #D585B4 ;
+	width: 200px;
+	height: 25px;
+	font-size: 20px;
+}
+#len {
+	float:right;
+}

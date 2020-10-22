@@ -1,0 +1,54 @@
+
+typedef long long ll;
+typedef double db;
+typedef pair<int, int> pii;
+typedef vector<int> vi;
+int qpow(ll a,ll b,ll m){ll c=1;while(b){if(b&1)c=c*a%m;b>>=1;a=a*a%m;}return c;}
+struct node{
+	int a1,b1,c1;
+};
+int vis[10005],w[10005],cnt=0,sum=0;
+vector<node>que[10005];
+deque<int>bfs;
+int main(){
+	ios::sync_with_stdio(false);
+	int n1,m1,s1,f,sum=0;
+	node tp;
+	cin>>n1>>m1>>s1;
+	rep(i,1,n1+1)w[i]=2147483647;
+	rep(i,0,m1){
+		cin>>tp.f>>tp.t>>tp.v;
+		que[tp.f].push_back(tp);
+	}
+	vis[s1]=1;
+	w[s1]=0;
+	bfs.push_front(s);
+	cnt++;
+	while(!bfs.empty()){
+	//	f=bfs.front();
+	//	while(w[f]*cnt>sum){
+	//		bfs.pop_front();
+	//		bfs.push_back(f);
+	//		f=bfs.front();
+		}
+		bfs.pop_front();
+		vis[f]=1;
+		sum-=w[f];
+		cnt--;
+		rep(i,0,que[f].size()){
+			tp=que[f][i];
+			if(w[tp.t]>w[tp.f]+tp.v){
+				w[tp.t]=w[tp.f]+tp.v;
+				if(vis[tp.t]==0){
+					vis[tp.t]=1;
+					sum+=w[tp.t];
+					cnt++;
+					if(!bfs.empty()&&w[tp.t]>w[f])bfs.push_back(tp.t);
+					else bfs.push_front(tp.t);
+				}
+			}
+		}
+		vis[f]=0;
+	}
+	rep(i,1,n+1)cout<<w[i]<<" ";
+}

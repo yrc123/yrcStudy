@@ -1,0 +1,94 @@
+		.title{
+			color:#F785BE ;
+		}
+		body{
+			font-family: "Microsoft Yahei";
+			font-size: 15px;
+		}
+		.bat{
+			background-color: #F4C4DE;
+			font-size: 15px;
+			color: black;
+		}
+		.pad{
+			max-width:100%;
+			max-height:100%;
+		}
+		.card{
+			display: inline-block;
+			height: 250px;
+			width:  150px;
+		}
+		.t1{
+			font-weight: bold;
+			color:#F988C5;
+			font-size:15px;
+			letter-spacing: 1px;
+		}
+		.t2{
+			font-weight: bold;
+			color:#D481B3;
+			font-size:17px;
+			letter-spacing: 2px;
+		}
+		.name{
+			display: block;
+			font-weight: bold;
+			color:#B6769C;
+			font-size:20px;
+			letter-spacing: 2px;
+			text-align: center;
+		}
+		.hw{
+			display: block;
+			margin: 0 auto;
+			font-size:5px;
+			width: 100px;
+			text-align: center;
+		}
+		.img{
+			width: 90px;
+			height: 90px;
+			margin: 0 auto;
+		}
+		.colorline{
+			display: inline-block;
+			width: 160px;
+			height: 10px;
+		}
+		table, th, td
+ 		{
+			border-collapse: collapse;
+ 			border: 3px solid #D381B8;
+			text-align: center;
+			font-size: 23px;
+ 		}
+		th{
+			background: #FEF3F9;
+		}
+		th,td{
+			height: 40px;
+		}
+		.sb{
+			background-color:rgba(255, 255, 255, 0);
+			color: white;
+			font-weight: bold;
+			border: 0px;
+			height: 35px;
+			width: 75px;
+			font-size: 20px;
+		}
+		.sbbg{
+			background-color: #F3BEDA;
+			border-radius: 5px;
+			width: 35px;
+			width: 75px;
+			display: inline-block;
+		}
+		a{
+			text-decoration:none;
+			color: black;
+		}
+		a:hover{
+			background-color:#F4C4DE; 
+		}
