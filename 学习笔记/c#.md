@@ -238,9 +238,8 @@
 
   - ```c#
     Task t5 = t1.ContinueWith(DoOnError,TaskContinuationOptions.OnlyOnFaulted);
-    
     ```
-
+  
 - 父任务和子任务
 
   - 一个任务在另一个任务内部创建，并**显示的绑定父进程**构成父子关系
@@ -251,3 +250,5 @@
   - 取消父任务就会取消子任务
 
 - 任务的结果
+
+### 线程同步
