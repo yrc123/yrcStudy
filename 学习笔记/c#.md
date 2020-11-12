@@ -238,9 +238,8 @@
 
   - ```c#
     Task t5 = t1.ContinueWith(DoOnError,TaskContinuationOptions.OnlyOnFaulted);
-    
     ```
-
+  
 - 父任务和子任务
 
   - 一个任务在另一个任务内部创建，并**显示的绑定父进程**构成父子关系
@@ -251,3 +250,144 @@
   - 取消父任务就会取消子任务
 
 - 任务的结果
+
+### 线程同步
+
+#### Monitor
+
+`System.Threading.Monitor`
+
+- TryEnter(Object obj,TimeSpan timeout)
+  - 试图获取对象的排它锁
+- Exit(Object obj)
+  - 释放锁
+- Wait(Object obj)
+  - 释放对象上的锁并阻塞当前线程，直到它重新获取该锁。
+
+#### Lock
+
+```c#
+lock  ( obj )
+{
+}
+//等同于
+Monitor.Enter(obj);
+try
+{
+}
+finally
+{
+    Monitor.Exit(obj);
+}
+```
+
+#### SyncRoot
+
+- 创建一个私有对象syncRoot，将这个对象用于lock语句
+
+#### Interlocked
+
+- Interlocked类用于使变量的简单语句原子化
+
+```c#
+public  int   State
+{
+    get
+    {  
+         lock (this) 
+         {
+               return  ++state;
+         }
+   }
+}
+//等同于
+public  int   State
+{     
+    get
+    {
+        return  Interlocked.
+                     Increment(ref  state);  
+    }
+}
+
+```
+
+#### WaitHandle
+
+- WaitHandle是一个抽象基类
+- 我们一般不直接使用，而是使用它的派生类：
+  - AutoResetEvent
+  - EventWaitHandle
+  - ManualResetEvent
+  - Mutex
+  - Semaphore
+- bool  WaitOne (int millisecondsTimeout, bool exitContext)
+  - 阻止当前线程，直到当前 WaitHandle 收到信号。
+  - exitContext是true，则等待之前先退出上下文的同步域，然后稍后重新获取它，否则为false
+
+```c#
+//通过等待句柄实现异步查询并同步返回结果
+private List<string> test()
+        {
+            List<string> list = new List<string>();
+            //创建等待事件句柄集合
+            var watis = new List<EventWaitHandle>();
+            for (int i = 0; i < 5; i++)
+            {
+                //创建句柄   true终止状态
+                var handler = new ManualResetEvent(false);
+                watis.Add(handler);
+                //将要执行的方法参数化
+                ParameterizedThreadStart start = new ParameterizedThreadStart(selectData);
+                //创建线程，传入线程参数
+                Thread t = new Thread(start);
+                //启动线程
+                t.Start(new Tuple<int, EventWaitHandle, List<string>>(i, handler,list));
+            }
+            //等待句柄
+            WaitHandle.WaitAll(watis.ToArray());
+            return list;
+        }
+```
+
+#### Mutex
+
+- Mutex(Boolean initiallyOwned, String name, out Boolean createdNew)
+  - 第三个out参数用于表明是否获得了初始的拥有权
+  - 互斥锁定可以在另一个进程中定义，因为操作系统知道**有名称的互斥锁定**，它由**不同的进程共享** 
+  -  如果没**有给互斥锁定指定名称**，互斥锁定就是未命名的，**不在不同的进程间共享**
+  - 因为系统知道有名称的互斥锁定，因此可以禁用它启动应用程序两次
+
+- WaitOne public virtual bool  WaitOne( )
+  - 分配互斥体访问权，该方法只向一个线程授予对互斥体的独占访问权
+- ReleaseMutex
+  - 如果一个线程获取了互斥体，则要获取该互斥体的第二个线程将被挂起，直到第一个线程用该方法释放该互斥体
+
+```c#
+if ( Mutex.WaitOne() )
+{
+     try
+    {
+     }
+     finally
+    {
+        mutex.ReleaseMutex( );
+    }
+}
+else
+{
+}
+```
+
+#### Semphore
+
+- 常用于限制可以访问某些资源的线程数量
+
+- Semaphore 只有3个操作：
+
+  - Semaphore(int)：初始化
+
+  - acquire()：获取资源
+
+  - release()：释放资源
+
