@@ -853,3 +853,41 @@ $$
 
 ##### Serial Old收集器
 
+![image-20201120084853671](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20201120084853671.png)
+
+- Serial的老年代版本
+
+- 使用标记整理算法
+
+##### Parallel Old收集器
+
+![image-20201120090101325](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20201120090101325.png)
+
+- Parallel Old是Parallel Scavenge收集器的老年代版本
+- 支持多线程并发收集
+- 基于标记-整理算法实
+
+##### CMS收集器
+
+![image-20201120090230703](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20201120090230703.png)
+
+- CMS（Concurrent Mark Sweep）收集器是一种以获取最短回收停顿时间为目标的收集器。
+- 基于标记-清除算法
+- 收集分为四个部分
+  - 初始标记(要暂停用户线程)
+  - 并发标记
+  - 重新标记(要暂停用户线程)
+  - 并发清除
+- 四个部分的作用
+  - 初始标记用来标记GC Roots能直接关联到的对象
+  - 并发标记是从GC Roots直接关联对象遍历整个对象图
+  - 重新标记是为了修正并发期间的数据不一致
+  - 并发清除是清除掉标记阶段被判断成死亡的对象
+- 缺点
+  - 无法处理"浮动垃圾"，即在并发标记和并发清理生成的垃圾
+  - 因为在并发的时候用户线程还在运行，所以CMS不能等到老年代几乎满了才进行搜集。
+  - 要预留空间，不然会出现"并发失败"，要暂停用户线程，并临时使用Serial Old来收集
+  - 因为是标记清除算法，会产生很多碎片，触发一次Full GC
+
+##### Garbage First(G1) 收集器
+
