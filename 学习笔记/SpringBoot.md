@@ -891,3 +891,576 @@ public class UserServiceImpl implements UserService{
 ​	因为Spring的声明式事务是通过AOP织入的，而直接调用自身方法就不是通过代理对象来调用方法
 
 ## Redis
+
+### spring-data-redis
+
+- 是对redis提供的客户端（Jedis）的封装
+- 连接池自动管理，提供了RedisTemplate类
+- 将jedis的api封装，将同一类型的操作封装为operation接口
+
+#### RedisTemplate
+
+##### 数据封装接口
+
+| 操作接口        | 功能                 | 获取接口      |
+| --------------- | -------------------- | ------------- |
+| HashOperations  | 散列操作接口         | opsForHash()  |
+| ListOperations  | 列表（链表）操作接口 | opsForList()  |
+| SetOperations   | 集合操作接口         | opsForSet()   |
+| ValueOperations | 字符串操作接口       | opsForValue() |
+| ZSetOperations  | 有序集合操作接口     | opsForZSet()  |
+
+##### 对一个键值对连续操作接口
+
+| 接口                 | 说明                                 | 获取接口             |
+| -------------------- | ------------------------------------ | -------------------- |
+| BoundHashOperations  | 绑定一个散列数据类型的键操作         | boundHashOps([key])  |
+| BoundListOperations  | 绑定一个列表（链表）数据类型的键操作 | boundListOps([key])  |
+| BoundSetOperations   | 绑定一个集合数据类型的键操作         | boundSetOps([key])   |
+| BoundValueOperations | 绑定一个字符串集合数据类型的键操作   | boundValueOps([key]) |
+| BoundZSetOperations  | 绑定一个有序集合数据类型的键操作     | boundZSetOps([key])  |
+
+##### 序列化器
+
+- JdkSerializationRedisSerializer
+  - RedisTemplate中默认的序列化器
+  - 将pojo类通过ObjectInputStream/ObjectOutputStream进行序列化操作
+- StringRedisSerializer
+  - 根据指定的charset对数据的字节序列编码成string
+  - RedisTemplate中帮我们实现的，可以从RedisTemplate中获取
+  - 也可从`RedisSerizlizer.string()`获取，但是这个相当于使用了 UTF_8 编码的 StringRedisSerializer，需要注意字符集问题。
+- Jackson2JsonRedisSerializer
+  - 可以将pojo实例序列化成json格式存储在redis中
+  - 在构造的时候要给出class或JavaType
+  - 不够通用
+- GenericJackson2JsonRedisSerializer
+  - 同上，但是这种序列化方式**不用自己手动指定对象的Class**。
+  - 所以其实我们就可以使用一个**全局通用的序列化方式了**。
+  - 可以从`RedisSerizlizer.json()`中获取
+  - ![image-20210207200121001](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210207200121001.png)
+
+#### StringRedisTemplate
+
+- 继承自`RedisTemplate<String, String>`
+- 只能使用传入String类型
+
+#### RedisCallback和SessionCallback接口
+
+- 两个接口都可以在一个连接下执行多条指令
+- RedisCallback比较底层，要对类型进行转换
+- SessionCallback进行了封装
+
+##### RedisCallback
+
+```java
+public void useRedisCallback(RedisTemplate redisTemplate){
+    redisTemplate.excute(new RedisCallback(){
+        @Override
+        public Object doInRedis(RedisConnection rc){
+            rc.set("key1".getBytes(),"value1".getBytes());
+            return null;
+        }
+    })
+}
+```
+
+##### SessionCallback
+
+```java
+public void useSessionCallback(RedisTemplate redisTemplate){
+    redisTemplate.excute(new SessionCallback(){
+        @Override
+        public Object execute(RedisOpserations ro){
+            ro.opsForValue().set("key1","value1");
+            return null;
+        }
+    })
+}
+```
+
+### 在Spring Boot中使用Redis
+
+#### 配置文件
+
+```properties
+#配置连接池属性
+# 连接池中的最小空闲连接
+spring.redis.jedis.pool.min-idle=5
+# 连接池最大连接数（使用负值表示没有限制）
+spring.redis.jedis.pool.max-active=10
+# 连接池中的最大空闲连接
+spring.redis.jedis.pool.max-idle=10
+# 连接池最大阻塞等待时间（使用负值表示没有限制）
+spring.redis.jedis.pool.max-wait=2000
+# 连接超时时间（毫秒）
+spring.redis.timeout=0
+#配置Redis服务器属性
+spring.redis.port=6379
+spring.redis.host=ip
+spring.redis.password=password
+```
+
+#### 注解
+
+##### @PostConstruct
+
+- Java自带的注解，可以注释一个非静态的void方法
+- @PostConstruct修饰的方法会在服务器加载Servlet的时候运行，并且只会被服务器执行一次
+- Constructor(构造方法) -> @Autowired(依赖注入) -> @PostConstruct(注释的方法)
+
+### Redis特殊用法
+
+#### Redis事务
+
+- 事务通常组合是watch...multi...exec
+  - `watch([key])`：用来设置监视的key
+  - `multi()`：用来开启事务
+  - `exec()`：执行事务
+- 如果被监视的值的值在`watch`后、`exec`之前改变，事务会被取消
+- 因为事务的watch...multi...exec要在**一次连接中执行**，使用SessionCallback
+- 因为开启事务后，命令**不会马上被执行**，而是放在一个队列中，所以**返回值null**
+- `exec()`的返回值为`List`类，是事务中所有语句的返回值列表
+
+```java
+//返回值为一个List，一种返回实例为：[true,"1"]
+public Object getMultiUser(String key){
+	return redisTemplate.execute(new SessionCallback() {
+		@Override
+		public Object execute(RedisOperations operations) throws DataAccessException {
+            //监视key
+			operations.watch(key);
+            //开启事务
+			operations.multi();				
+            operations.opsForValue().set(key,"1");
+			operations.opsForValue().get(key);
+            //执行并返回结果
+			return operations.exec();
+		}
+	});
+}
+```
+
+#### 使用Redis流水线
+
+- 即`redisTemplate.executePiplined`方法
+- 和`execute`相似，不在赘述
+- 使用流水线技术，减缓在网络传输中的瓶颈
+
+#### 使用Redis发表订阅
+
+![image-20210208111649686](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210208111649686.png)
+
+- 实现`MessageListener`接口，其中
+  - `Message message`参数代表Redis发送来的信息
+  - `byte[] pattern`是渠道名称
+- `RedisMessageListenerContainer`是监听容器，要将连接工厂、任务池(可选)、消息监听器放入，就实现了消息监听
+
+```java
+//自定义监听器
+@Component
+public class RedisMessageListener implements MessageListener{
+    @Override
+    public void onMessage(Message message, byte[] pattern){
+        //消息体
+        String body = new String(message.getBody());
+        //消息渠道
+        String topic = new String(pattern);
+        System.out.println(body);
+        System.out.println(topic);
+    }
+}
+```
+
+```java
+//定义Redis的监听容器
+public class Application{
+    //Redis连接工厂
+    @Autowired
+    private RedisConnectionFactory connectionFactory = null;
+    //Redis消息监听器
+    @Autowired
+    private MessageListener redisMsgListener = null;
+    
+    //连接池
+    private ThreadPoolTaskScheduler taskScheduler = null;
+    
+    @Bean
+    public ThreadPoolTaskScheduler initTaskScheduler(){
+        if(TaskScheduler != null){
+            return taskScheduler;
+        }
+        taskScheduler = new ThreadPoolTaskScheduler();
+        //设置任务池大小为20，可以运行线程，并进行阻塞
+        taskScheduler.setPoolSize(20);
+        return taskScheduler;
+    }
+    
+    @Bean
+	public RedisMessageListenerContainer initRedisContainer(){
+        //新建连接器
+		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+		//设置连接工厂
+		container.setConnectionFactory(connectionFactory);
+        //设置任务池[可选]
+        container.setTaskExecutor(initTaskScheduler());
+		//新建消息渠道
+		Topic topic = new ChannelTopic(("topic1"));
+		//添加监听器
+		container.addMessageListener(redisMessageListener,topic);
+		//自动装配
+		return container;
+	}
+
+}
+```
+
+#### 缓存管理器配置
+
+```properties
+#如果由底层的缓存管理器支持创建，以逗号分隔的列表来缓存名称，便于注解的引用
+spring.cache.cache-names=redisCache
+#是否允许Redis缓存空值
+spring.cache.redis.cache-null-values=true
+#Redis的键前缀
+spring.cache.redis.key-prefix=
+#缓存超时时间戳，配置为 0 则不设置超时时间
+spring.cache.redis.time-to-live=0ms
+#是否启用Redis的键前缀
+spring.cache.redis.use-key-prefix=true
+#缓存类型，在默认的情况下，Spring会自动根据上下文探测
+spring.cache.type=redis
+```
+
+#### 注解
+
+##### @EnableCaching
+
+- 在配置类中加上这个注解，就可以启用Spring缓存
+
+##### @CachePut
+
+- 用来将被注释方法返回的结果存放到缓存中
+- 在更新数据库的操作中，**不要从缓存中读取数据**，因为缓存是不可信的！
+- `value`：缓存名，即配置文件中的`spring.cache.cache-names`的值
+- `key`：是一个Spring EL表达式，用来设置键名
+  - 如`'redis_user_'+#id`中，`#id`是通过参数名匹配
+  - 还可以通过`#a[0], #p[0], #a[1], #p[1] ...`来匹配第零个参数、第一个参数...
+  - `#result`代表方法的返回结果对象，是在MyBatis回填之后的值，`#result.id`代表返回结果中的id属性
+- `condition`：是一个Spring EL表达式，要求返回Boolean值，如果为true，就使用缓存操作，否则执行方法
+  - 如`#result != 'null'`，如果返回`null`，就不再操作缓存
+
+##### @Cacheable
+
+- 用来从缓存中读取结果，如果结果存在，则返回，否则执行被注释的方法，并将结果**保存到缓存中**
+- `value`：同上
+- `key`：同上
+- `condition`：同上
+
+##### @CacheEvict
+
+- 通过定义的键移除缓存
+- `value`：同上
+- `key`：同上
+- `condition`：同上
+- `beforeInvocation`：表示在方法前还是在方法后删除缓存，默认是`false`，即在方法后移除缓存
+
+#### 缓存注解实例
+
+**用户实体类**
+
+```java
+package com.studyspringboot.ch7.pojo;
+
+import ...
+
+@Alias("user")
+public class User implements Serializable {
+	private static final long serialVersionUID = 776061456107358247L;
+	private Long id;
+	private String userName;
+	private String note;
+
+	/**Getter and Setter*/
+}
+```
+
+**数据库接口**
+
+```java
+package com.studyspringboot.ch7.dao;
+
+import ...
+
+@Repository
+public interface MyDao {
+	//获取单个用户
+	User getUser(Long id);
+	//插入用户
+	int insertUser(User user);
+	//更新用户
+	int updateUser(User user);
+	//查询用户
+	List<User> findUsers(@Param("userName") String userName, @Param("note") String note);
+	//删除用户
+	int deleteUser(Long id);
+}
+
+```
+
+**MyBatis映射文件**
+
+```xml
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.studyspringboot.ch7.mycache.dao.MyDao">
+    <!--通过id查找用户-->
+    <select id="getUser" parameterType="long" resultType="user">
+        select id, user_name as userName, note from user where id=#{id}
+    </select>
+    <!--插入用户-->
+    <insert id="insertUser" useGeneratedKeys="true" keyProperty="id" parameterType="user">
+        insert into user(user_name, note) values(#{userName}, #{note})
+    </insert>
+    <!--更新用户信息-->
+    <update id="updateUser">
+        update user
+        <set>
+            <if test="userName != null">
+                user_name =#{userName},
+            </if>
+            <if test="note != null">
+                note =#{note}
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+    <!--通过用户名和简介查找用户-->
+    <select id="findUsers" resultType="user">
+        select id, user_name as userName, note from user
+        <where>
+            <if test="userName != null">
+                and user_name=#{userName}
+            </if>
+            <if test="note != null">
+                and note = #{note}
+            </if>
+        </where>
+    </select>
+    <!--删除用户-->
+    <delete id="deleteUser" parameterType="long">
+        delete from user where id = #{id}
+    </delete>
+</mapper>
+```
+
+**配置文件**
+
+```properties
+#ch7
+#MyBatis
+mybatis.mapper-locations=sql/userMapperch7.xml
+mybatis.type-aliases-package=com.studyspringboot.ch7
+#redis
+spring.redis.host=ip
+spring.redis.port=port
+spring.redis.password=password
+#缓存管理器
+spring.cache.cache-names=redisCache
+spring.cache.type=redis
+
+```
+
+**控制器**
+
+```java
+package com.studyspringboot.ch7.controller;
+
+import ...
+
+@Controller
+public class MyController {
+	@Autowired
+	private MyService myService = null;
+	
+    //通过id查找用户
+	@RequestMapping("/getUser")
+	@ResponseBody
+	public User getUser(Long id){
+		return myService.getUser(id);
+	}
+    //插入用户
+	@RequestMapping("/insertUser")
+	@ResponseBody
+	public User insertUser(String userName, String note){
+		User user = new User();
+		user.setUserName(userName);
+		user.setNote(note);
+		myService.insertUser(user);
+		return user;
+	}
+	//通过用户名和简介查找用户
+	@RequestMapping("/findUsers")
+	@ResponseBody
+	public List<User> findUsers(String userName, String note){
+		return myService.findUsers(userName,note);
+	}
+	//更新用户信息
+	@RequestMapping("/updateUserName")
+	@ResponseBody
+	public Map<String,Object> updateUserName(Long id, String userName){
+		User user = myService.updateUserName(id,userName);
+		boolean flag = user != null;
+		String message = flag?"update success":"update fail";
+		return resultMap(flag,message);
+	}
+	//删除用户
+	@RequestMapping("/deleteUser")
+	@ResponseBody
+	public Map<String, Object> deleteUser(Long id){
+		int result = myService.deleteUser(id);
+		boolean flag = result==1;
+		String message = flag? "del success":"del fail";
+		return resultMap(flag,message);
+	}
+
+	private Map<String,Object> resultMap(boolean success, String message){
+		Map<String, Object> map = new HashMap<>();
+		map.put("flag",success);
+		map.put("message",message);
+		return map;
+	}
+}
+```
+
+**服务**
+
+```java
+package com.studyspringboot.ch7..service;
+
+import ...
+
+public interface MyService {
+	public User insertUser(User user);
+	public User getUser(Long id);
+	public User updateUserName(Long id, String userName);
+	public List<User> findUsers(String userName, String note);
+	public int deleteUser(Long id);
+}
+```
+
+```java
+package com.studyspringboot.ch7.service;
+
+import ...
+
+@Service
+public class MyServiceImpl implements MyService {
+	@Autowired
+	private MyDao myDao= null;
+
+    //插入用户
+	@Override
+	@Transactional
+	@CachePut(value="redisCache",key = "'redis_user_'+#result.id")
+	public User insertUser(User user) {
+		myDao.insertUser(user);
+		return user;
+	}
+	//通过id查找用户
+	@Override
+	@Transactional
+	@Cacheable(value = "redisCache" ,key = "'redis_user_'+#id")
+	public User getUser(Long id) {
+		return myDao.getUser(id);
+	}
+	//更新用户信息
+	@Override
+	@Transactional
+	@CachePut(value = "redisCache" ,key = "'redis_user_'+#id", condition = "#result != 'null'")
+	public User updateUserName(Long id, String userName) {
+		User user = this.getUser(id);
+		if(user == null){
+			return null;
+		}
+		user.setUserName(userName);
+		myDao.updateUser(user);
+		return user;
+	}
+	//通过用户名和简介查找用户
+	@Override
+	public List<User> findUsers(String userName, String note) {
+		return myDao.findUsers(userName,note);
+	}
+	//删除用户
+	@Override
+	@Transactional
+	@CacheEvict(value = "redisCache" ,key = "'redis_user_'+#id",beforeInvocation = false)
+	public int deleteUser(Long id) {
+		return myDao.deleteUser(id);
+	}
+}
+```
+
+主函数
+
+```java
+package com.studyspringboot.ch7.main;
+
+import ...
+
+@SpringBootApplication(scanBasePackages = {"com.studyspringboot.ch7.mycache"})
+@MapperScan(basePackages = "com.studyspringboot.ch7.mycache", annotationClass = Repository.class)
+//启用缓存
+@EnableCaching
+public class Application {
+	@Autowired
+	private RedisConnectionFactory connectionFactory = null;
+	@Autowired
+	private RedisTemplate redisTemplate = null;
+    
+	@PostConstruct
+	public void init(){
+		initRedisTemplate();
+	}
+    //配置序列化器
+	private void initRedisTemplate(){
+		RedisSerializer stringSerializer = redisTemplate.getStringSerializer();
+		redisTemplate.setKeySerializer(stringSerializer);
+		redisTemplate.setValueSerializer(RedisSerializer.json());
+		redisTemplate.setStringSerializer(stringSerializer);
+		redisTemplate.setHashKeySerializer(stringSerializer);
+		System.out.println("Serializer");
+	}
+	public static void main(String[] args) {
+		SpringApplication.run(Application.class,args);
+	}
+}
+```
+
+#### 自定义缓存管理器
+
+​	要删除配置文件中关于缓存管理器的配置，之后在配置代码中注入`redisCacheManager`类
+
+```java
+//自定义Redis缓存管理器
+@Bean(name = "cacheManager")
+@Primary
+public CacheManager initRedisCacheManager(){
+	//Redis加入写入锁
+	RedisCacheWriter writer = RedisCacheWriter.lockingRedisCacheWriter(connectionFactory);
+	//启动Redis缓存默认配置
+	RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig();
+	//设置序列化器为GenericJackson2JsonRedisSerializer
+	config = config.serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
+	RedisCacheManager redisCacheManager = new RedisCacheManager(writer, config);
+	return redisCacheManager;
+	//通过builder
+	//return RedisCacheManager.builder(connectionFactory).cacheDefaults(config).build();
+}
+```
+
+#### 缓存自调用失效
+
+​	同数据库事务中的自调用失效
