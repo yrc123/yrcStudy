@@ -163,7 +163,6 @@ info Sentinel
 >  - redis-3.0.0.rc1加入cluster-require-full-coverage参数,默认关闭,打开集群兼容部分失败。
 >  - 如果集群超过半数以上master挂掉，无论是否有slave，集群进入fail状态。
 >
->
 
 #### 配置方式
 

@@ -414,6 +414,8 @@ spring.datasource.url=jdbc:mysql://ip/DataBaseName
 spring.datasource.username=...
 #密码
 spring.datasource.password=...
+#是否开启自动下划线转驼峰
+mybatis.configuration.map-underscore-to-camel-case=...
 ```
 
 ### 整合MyBatis框架|[MyBatis3中文文档](https://mybatis.org/mybatis-3/zh)
@@ -603,7 +605,7 @@ public MapperFactoryBean<MyBatisUserDao> initMyBatisUserDao(){
 }
 ```
 
-##### 使用@MapperScan装配MyBatis
+##### ~~使用@MapperScan装配MyBatis~~
 
 ```java
 package com.studyspringboot.ch5.main;
@@ -631,6 +633,10 @@ public class Application {
 	...
 }
 ```
+
+##### 使用@Mapper装配MyBatis
+
+直接在Dao接口上使用`@Mapper`注解，而不是用别的，就可以了
 
 #### 其他代码
 
@@ -1464,3 +1470,987 @@ public CacheManager initRedisCacheManager(){
 #### 缓存自调用失效
 
 ​	同数据库事务中的自调用失效
+
+## Spring MVC开发
+
+### 注解
+
+#### @ReqestMapping
+
+- `value`和`path`：都是用来设置请求的URL路径，可以使用正则
+- `method`：用来设置HTTP请求类型，如GET，POST
+- `params`：当存在对应的 HTTP 参数时才响应请求
+- `headers`：限定请求头存在对应的参数时才响应
+- `consumes`：限定 HTTP 请求体提交类型，如`application/json`、`text/html`
+- `produces`：限定返回的内容类型，仅当HTTP请求头中的（Accept）类型中包含该指定类型时才返回
+
+#### @GetMapping
+
+- 专门用来响应GET方法
+
+#### @PostMapping
+
+- 专门用来响应POST方法
+
+### 获取请求参数
+
+#### 无注解情况
+
+- 要求参数名称和HTTP请求参数名保持一致
+- 如果java方法参数是一个类，springboot也会自动尝试注入属性
+
+#### @RequestParam
+
+- 可以在java方法参数前加入注释来确定映射关系
+  - 如：`public User getUser(@RequestParam("int_val") Integer intVal)`，将`intVal`映射到`int_val`上
+
+#### 传递数组
+
+- Spring MVC可以接受数组的参数
+- 每个数组元素只需要通过逗号分隔
+  - 如请求url：`http://localhost/getUser?intArr=1,2,3&longArr=4,5,6`
+
+#### @RequestBody
+
+- 通过在java方法参数前加入注解，Spring MVC会将json请求体转换成对应的类
+  - 如`public User getUser(@RequestBody User user) `：将会把json转换成User对象
+
+#### @PathVariable
+
+- 在一些网站中，提出了REST风格，这时参数往往通过URL进行传递
+
+- 如要获取编号为1的用户，URL为`/user/1`
+
+- 通过在java方法参数前加入注解，来获取URL中的参数
+
+  - ```java
+    //用{...}表明参数的位置
+    @GetMapping("/{id}")
+    @ResponseBody
+    public User get(@PathVariable("id") Long id){
+        return userService.getUser(id);
+    }
+    ```
+
+#### 获取格式化参数
+
+##### @DateTimeFormat
+
+- 通过在java方法参数前加入注解，可以根据约定的格式把数据转换出来
+  - 如`public void getDate(@DateTimeFormat(iso=ISO.DATE) Date date)`：可以解析形如`2017-08-08`
+- Spring Boot中也可以在配置文件中设置日期格式，而不用注解
+  - `spring.mvc.date-format=yyyy-MM-dd`
+
+##### @NumberFormat
+
+- 通过在java方法参数前加入注解，可以根据约定的格式把数据转换出来
+  - 如`public void getNum(@NumberFormate(pattern = "#,###.##" Double number))`：可以解析形如`1,234,567.89`
+
+### 返回类型
+
+#### @ResponseBody
+
+- 将返回类型转换成json格式
+
+### 自定义参数转换规则
+
+![image-20210209214059916](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210209214059916.png)
+
+- 其中Converter、Formatter、GenericConverter都是转化器
+- Spring Boot会自动找出所有的转换器，注册到Bean中
+
+#### 一对一转换器|Converter
+
+- 将一种类型转换成另一种类型
+
+- 接口定义
+
+  - ```java
+    public interface Converter<S, T>{
+        T convert(S source);
+    }
+    ```
+
+- 在实现了这个接口后，Spring Boot会自动装配，在Controller中也会自动调用
+
+#### 集合和数组转换|GenericConverter
+
+- 会自动寻找对应的Converter转换器
+
+### 数据验证
+
+#### 启用验证
+
+- 使用`@Valid`来启用验证
+
+```java
+/***
+ * @Valid会开启验证，通过属性上的注解来验证
+ * Errors errors是验证POJO后自动填充的
+***/
+public String validate(@Valid @RequestBody User,Errors errors){
+    ...
+}
+```
+
+#### JSR-303
+
+- 注解在变量的定义上
+
+```java
+public class User{
+    @NotNull(message = "id不能为空")
+    private Long id;
+}
+```
+
+##### 一些注解
+
+| 注解                        | 作用                                                         |
+| --------------------------- | ------------------------------------------------------------ |
+| @Null                       | 必须为null                                                   |
+| @NotNull                    | 必须非null                                                   |
+| @AssertTrue                 | 必须为true                                                   |
+| @AssertFalse                | 必须为false                                                  |
+| @Min(value)                 | 必须为一个数字，且大于设定的最小值                           |
+| @Max(value)                 | 必须为一个数字，且小于设定的最大值                           |
+| @DecimalMin(value)          | 必须为一个数字，且大于设定的最小值，且支持BigDecimal等高精度 |
+| @DecimalMax(value)          | 必须为一个数字，且小于设定的最大值，且支持BigDecimal等高精度 |
+| @Size(max,min)              | 必须在设定的范围内                                           |
+| @Digits(integer, faraction) | 必须是一个数字，且在可接受的范围内                           |
+| @Past                       | 必须是一个过去的日期                                         |
+| @Future                     | 必须是一个将来的日期                                         |
+| @Pattern                    | 必须符合指定的正则表达式                                     |
+
+<center>Bean Validation中内置的constraint</center>
+
+| 注解      | 作用                           |
+| --------- | ------------------------------ |
+| @Email    | 必须是邮箱地址                 |
+| @Lenght   | 长度必须在指定范围内           |
+| @NotEmpty | 字符串不为空                   |
+| @Range    | 被注释的元素必须在合适的范围内 |
+
+<center> Hibernate Validator附加的constraint</center>
+
+### 自定义参数验证
+
+- Spring除了可以注册转换器，还能注册验证器
+
+  - 接口定义
+
+  - ```java
+    public interface Validator{
+        //用来判断当前验证器是否支持该Class类型
+        boolean supports(Class<?> clazz);
+        //如果是支持的类型，就执行这个方法来验证
+        //Errors为错误对象
+        void validate(Object target, Errors errors);
+    }
+    ```
+
+#### 实例
+
+**自定义用户验证器**
+
+```java
+public class UserValidator implements Validator{
+    @Override
+    public boolean supports(Class<?> clazz){
+        return clazz.equals(User.class);
+    }
+    //验证逻辑
+    @Override
+    public void validate(Object target, Errors errors){
+        //对象为空
+        if(target==null){
+            //直接在参数处报错，不进入控制器的方法
+            errors.rejectValue("",null,"用户不能为空");
+            return;
+        }
+        User user=(User) target;
+        if(StringUtils.isEmpty(user.getUserName())){
+            //增加错误，可以进入控制器方法
+            errors.rejectValue("userName",null,"用户名不能为空")
+        }
+    }
+}
+```
+
+**绑定验证器**
+
+- 使用`@InitBinder`注解可以改变WebDataBinder流程
+- 处理器会先执行被注解的方法，可以将WebDataBinder作为参数传入
+- 在执行完被注解的方法之后，才会执行控制器方法
+
+```java
+public class UserController{
+    //调用控制器前先执行这个方法
+    @InitBinder
+    public void initBinder(WebDataBinder binder){
+        //绑定验证器
+        binder.setValidator(new UserValidator());
+        //定义日期参数格式，参数不再需用注解@DateTimeFormat,boolean参数辨识是否允许为空
+        binder.registerCustomEditor(Date.class, neew CustomDateEditor(new SimpleDateFormat("yyyy-MM-dd"), false));
+    }
+}
+```
+
+- 在使用注解`＠Valid`标注`User`参数后，Spring MVC就会去遍历对应的验证器，当遍历到UserValidator时，会去执行它的 supports 方法
+- 返回`true`后，Spring MVC会使用这个验证器去验证User类的数据
+
+### 数据模型
+
+### 视图和视图解析器
+
+### 文件上传
+
+#### Spring MVC对文件上传的支持
+
+​	使用适配器模式，将HttpServletRequest接口对象转换为MultipartHttpServletRequest对象。MultipartHttpServletRequest接口拓展了HttpServletRequest的所以方法，并**添加了操作文件的方法**。
+
+![image-20210217195755803](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210217195755803.png)
+
+#### 配置文件
+
+```properties
+#是否启用Spring MVC多部分上传功能
+spring.servlet.multipart.enabled=true
+#将文件写入磁盘的阈值。可以用"MB"、"KB"表示大小
+spring.servlet.mutipart.file-size-threshold=0
+#指定默认上传的文件夹
+spring.servlet.multipart.location=
+#限制单个文件最大大小
+spring.servlet.multipart.max-file-size
+#限制所有文件最大大小
+spring.servlet.mutipart.max-request-size=
+#是否延迟多部件文件请求的参数和文件的解析
+spring.servlet.multipart.resolve-lazily=false
+```
+
+#### 实例
+
+```java
+@Controller
+public class FileController{
+    //使用HttpServletRequest作为参数
+    @PostMapping("/HttpServletRequest")
+    public boolean uploadRequest(HttpServletRequest req){
+        //强制转换为MultipartHttpServletRequest接口对象
+        if(request instanceof MultipartHttpServletRequest){
+            mreq = (MultipartHttpServletRequest)req;
+        }else{
+            return false;
+        }
+        //获取MultipartFile文件信息
+        MultipartFile mf = mreq.getFile("file");
+        //获取文件名，用文件名创建文件
+        File file = new File(mf.getOriginalFilename);
+        try{
+            //保存文件
+            mf.transferTo(file);
+        }catch(Exception e){
+            ...
+        }
+        ...
+    }
+    //使用Spring MVC的MultipartFile类作为参数
+    @PostMapping("/MultipartFile")
+    public boolean uploadRequest(MultipartFile file){
+        //使用方法和上面一致
+        ...
+    }
+    //使用Part作为参数
+    @PostMapping("/Part")
+    public boolean uploadPart(Part file){
+        //获取提交文件名称
+        String fileName = file.getSubmittedFileName();
+        try{
+            //写入文件
+            file.write(fileName);
+        }catch(Exception e){
+            ...
+        }
+        ...
+    }
+}
+```
+
+### 拦截器
+
+#### 拦截器设计
+
+![image-20210218174038154](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210218174038154.png)
+
+- 拦截器接口定义
+
+  - ```java
+    public interface HandlerInterceptor{
+        //处理器执行前方法
+        default boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+            return true;
+        }
+        //处理器处理后方法
+        default void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable ModelAndView modelAndView) throw Exception{
+        }
+        //处理器完成后方法
+        default void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable Exception ex) throws Exception{
+        }
+    }
+    ```
+
+#### 实例
+
+**自定义拦截器**
+
+```java
+package com.studyspringboot.ch10.inteceptor;
+
+import ...
+
+public class MyInterceptor implements HandlerInterceptor {
+	@Override
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+		System.out.println("pre");
+		return true;
+	}
+
+	@Override
+	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+		System.out.println("post");
+	}
+
+	@Override
+	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+		System.out.println("after");
+	}
+}
+```
+
+**注册拦截器**
+
+```java
+package com.studyspringboot.ch10.inteceptor;
+
+import ...
+
+@SpringBootApplication
+public class Application implements WebMvcConfigurer {
+	public static void main(String[] args) {
+		SpringApplication.run(Application.class,args);
+	}
+
+	@Override
+	public void addInterceptors(InterceptorRegistry registry) {
+		//注册拦截器到MVC机制，然会一个拦截器的注册
+		InterceptorRegistration ir = registry.addInterceptor(new MyInterceptor());
+		//指定拦截匹配模式
+		ir.addPathPatterns("/interceptor/*");
+	}
+}
+```
+
+**控制器**
+
+```java
+package com.studyspringboot.ch10.inteceptor;
+
+import ...
+
+@Controller
+@RequestMapping("/interceptor")
+public class MyController {
+	@RequestMapping("test")
+	@ResponseBody
+	public boolean test(){
+		return true;
+	}
+}
+```
+
+#### 拦截顺序
+
+- 对于处理器前方法采用先注册先执行
+- 而处理器后方法和完成方法则是先注册后执行的规则
+
+#### 拦截器与过滤器的区别
+
+>1. 拦截器是基于java的**反射机制**的，而过滤器是基于**函数回调**。
+>2. 拦截器不依赖与servlet容器，过滤器依赖与servlet容器。
+>3. 拦截器只能对action请求起作用，而过滤器则可以对几乎所有的请求起作用。
+>4. 拦截器可以访问action上下文、值栈里的对象，而过滤器不能访问。
+>5. 在action的生命周期中，拦截器可以多次被调用，而过滤器只能在容器初始化时被调用一次
+>
+>**执行顺序** ：过滤前 - 拦截前 - Action处理 - 拦截后 - 过滤后。
+
+### 国际化
+
+### Spring MVC拾遗
+
+#### 获取请求头参数
+
+- 使用`@RequestHeader`注解
+
+- 例如
+
+  - ```java
+    @RequestMapping("/test")
+    @ResponseBody
+    public User headerUser(@RequestHeader("id") Long id){
+        return userService.getUser(id);
+    }
+    ```
+
+#### 跨域访问
+
+@CrossOrigin
+
+## 构建REST风格网站
+
+## Spring Security
+
+自定义认证服务->
+
+UserDetailsBuilder：用户详情构造器
+
+Principal
+
+### 使用WebSecurityConfigurerAdapter自定义
+
+​	总的来说，Spring Security通过`SecurityConfigurrer`接口来配置Spring Security。而`WebSecurityConfigurerAdapter`抽象类默认实现了基本的设置，用户也可以通过继承重写他的方法来自定义功能，而不用从零开始配置。
+
+**WebSecurityConfigurerAdapter中的三个默认方法**
+
+```java
+...
+//AuthenticationManagerBuilder是签名器构造器，用于构建用户的具体权限控制
+//用来配置用户签名服务，可以重写这个方法来自定义用户服务器、加密编码器等
+protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        this.disableLocalConfigureAuthenticationBldr = true;
+}
+//用来配置Filter链
+public void configure(WebSecurity web) throws Exception {
+}
+//用来配置拦截保护的请求，比如什么需要放行什么需要验证
+protected void configure(HttpSecurity http) throws Exception {
+    http.authorizeRequests((requests) -> {
+        ((AuthorizedUrl)requests.anyRequest()).authenticated();
+    });
+    //启用默认的登录
+    http.formLogin();
+    http.httpBasic();
+}
+...
+```
+
+### 自定义认证服务
+
+- 我们可以通过重写第一个方法来自定义密码编码器和用来读取用户信息的方式
+- 有多种密码编码器，这里介绍两种
+  - BCryptPasswordEncoder：是一种单向哈希值，但是如果设置了简单的密钥，任意被枚举来反向猜出未加密的密码
+  - Pbkdf2PasswordEncoder：使用基于口令的密钥派生算法，可以设置密钥，只有拿到密钥才能通过加密算法对密码进行匹配。
+
+- 有多种读取用户权限信息的方式，可以用`AuthenticationManagerBuilder`类的方法来定义
+
+  - `inMemoryAuthentication()`：将用户信息存储在内存中
+  - `jdbcAuthentication()`：可以通过它的方法来设定数据源和查询语句，来从数据库从匹配用户信息
+  - `userDetailsService()`：通过自定义实现了`UserDetailsService`接口的类来读取用户信息，我主要使用了这个
+
+  从上文我们了解到，我们只要实现了`UserDetailsService`接口，就可以使用我们想用的任何方法来存储用户权限信息
+
+**UserDetailsService接口**
+
+```java
+public interface UserDetailsService {
+	UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
+}
+```
+
+​	我们发现，这个接口就一个方法，这个方法是通过传入**用户名**来查询出一个实现了`UserDetails`接口的类，之后再通这个类来判断当前用户的权限信息
+
+**UserDetails接口**
+
+```java
+public interface UserDetails extends Serializable {
+	//权限列表，存储了当前用户的权限
+	Collection<? extends GrantedAuthority> getAuthorities();
+	//获取用户密码
+	String getPassword();
+	//获取用户名
+	String getUsername();
+	...
+}
+```
+
+​	这个接口有3个实现类：![image-20210224202924680](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210224202924680.png)
+
+我使用了他的第三个实现类`User`
+
+**User类**
+
+```java
+public class User implements UserDetails, CredentialsContainer {
+	...
+    //用户名
+	private String password;
+	//密码
+	private final String username;
+	//用户权限表
+	private final Set<GrantedAuthority> authorities;
+	//账号是否过期
+	private final boolean accountNonExpired;
+	//账号是否被锁定
+	private final boolean accountNonLocked;
+	//账号凭证是否过期
+	private final boolean credentialsNonExpired;
+	//账号是否被禁用
+	private final boolean enabled;
+	//通过用户名、密码和权限表来构造
+	public User(String username, String password, Collection<? extends GrantedAuthority> authorities) {
+		this(username, password, true, true, true, true, authorities);
+	}
+	//通过以上信息来构造
+	public User(String username, String password, boolean enabled, boolean accountNonExpired,
+			boolean credentialsNonExpired, boolean accountNonLocked,
+			Collection<? extends GrantedAuthority> authorities) {
+		Assert.isTrue(username != null && !"".equals(username) && password != null,
+				"Cannot pass null or empty values to constructor");
+		this.username = username;
+		this.password = password;
+		this.enabled = enabled;
+		this.accountNonExpired = accountNonExpired;
+		this.credentialsNonExpired = credentialsNonExpired;
+		this.accountNonLocked = accountNonLocked;
+		this.authorities = Collections.unmodifiableSet(sortAuthorities(authorities));
+	}
+...
+}
+```
+
+​	我只列出了他的属性和构造函数，我们发现，我们只要有**用户名**，**密码**和**权限表**，就可以创建出一个UserDetails了
+
+- 所以总的来说，想要自定义一个认证服务，只要一下几点
+  - 再数据库或用其他任何方法保存用户名、密码和对应的权限。当然，我们可以把他定义的User类的所有信息都存储到数据库中，但是这里进行了简化，数据库就存储了用户表、权限表和用户权限表。
+  - 我们自己写一个类实现**UserDetailsService接口**，他可以通过传入一个用户名来从数据库中查出用户信息，并封装成`UserDetails`类
+  - 最后认证服务通过我们的**UserDetailsService接口的实现类**，可以通过用户名来查询用户权限信息，并比较用户权限了
+
+#### 实现
+
+##### 数据库表
+
+**t_role**
+
+​	其中权限的前缀`Role_`为Spring Security中默认要拥有的，而后面的权限名可以随意
+
+![image-20210224215233068](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210224215233068.png)
+
+```sql
+CREATE TABLE `t_role` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_name` varchar(60) NOT NULL,
+  `note` varchar(256) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) 
+```
+
+**t_user**
+
+![image-20210224215419492](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210224215419492.png)
+
+```sql
+CREATE TABLE `t_user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_name` varchar(60) NOT NULL,
+  `pwd` varchar(100) NOT NULL,
+  `available` int(1) DEFAULT '1',
+  `note` varchar(256) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_name_UNIQUE` (`user_name`)
+)
+```
+
+**t_user_role**
+
+![image-20210224215451960](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210224215451960.png)
+
+```sql
+CREATE TABLE `t_user_role` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `role_user` (`role_id`,`user_id`),
+  KEY `FK1_idx` (`role_id`),
+  KEY `FK2_idx` (`user_id`),
+  CONSTRAINT `FK1` FOREIGN KEY (`role_id`) REFERENCES `t_role` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `FK2` FOREIGN KEY (`user_id`) REFERENCES `t_user` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+)
+```
+
+##### 实现UserDetailsService接口
+
+- 实现一个UserDetailsServiceImpl类
+  - UserRoleService是访问数据库的服务层，可以从中获取数据库的用户信息
+  - 我使用Mybatis来实现访问数据库，用Redis缓存用户信息
+
+**UserDetailsServiceImpl类**
+
+```java
+package com.studyspringboot.ch12.user.service;
+
+import ...
+
+@Service
+public class UserDetailsServiceImpl implements UserDetailsService {
+    //注入UserRoleService，可以通过用户名查询用户信息和权限列表
+	@Autowired
+	UserRoleService userRoleService;
+
+	@Override
+	public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
+        //MyUser为业务的用户实体类，可以获取用户名、密码，与t_user表对应
+		MyUser user = userRoleService.findUserByName(s);
+        //获取权限列表
+        //Role为我自定义的权限类，与t_role表对应
+		List<Role> roles = userRoleService.findRolesByUserName(s);
+        //将以上信息转换为UserDetails
+		UserDetails userDetails = changeToUserDetails(user, roles);
+		return userDetails;
+	}
+	private UserDetails changeToUserDetails(MyUser user, List<Role> roles){
+        //声明一个权限列表
+		List<GrantedAuthority> auths = new ArrayList<>();
+        //将查询出的权限表转换为需要的类型
+		for(Role role : roles){
+            //SimpleGrantedAuthority是一个简易的GrantedAuthority实现类
+            //可以通过自定义权限名构造
+			GrantedAuthority grantedAuthority = new SimpleGrantedAuthority(role.getRoleName());
+            //向list中添加用户
+			auths.add(grantedAuthority);
+		}
+        //构造用户
+		UserDetails userDetails = new User(user.getUserName(),user.getPwd(),auths);
+		return userDetails;
+	}
+}
+```
+
+**配置AuthenticationManagerBuilder**
+
+```java
+package com.studyspringboot.ch12.user.main;
+
+import ...
+
+@Component
+public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
+	@Autowired
+	UserDetailsServiceImpl userDetailsService;
+
+    //从配置文件中读取密钥
+	@Value("${system.user.password.secret}")
+	private String secret = null;
+
+	@Override
+	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        //密码编码器
+		PasswordEncoder encoder = new Pbkdf2PasswordEncoder(secret);
+        //设置我们自定义的UserDetailsService和密码编码器
+		auth.userDetailsService(userDetailsService)
+				.passwordEncoder(encoder);
+	}
+}
+```
+
+### 限制请求
+
+- 我们可以给不同的路径设置不同的访问权限，也可以设置权限不足和未登录时的跳转页面
+  - 通过重写`configure`方法来实现
+  - 也可以通过注解设置权限
+
+#### 通过重写方法
+
+```java
+package com.studyspringboot.ch12.user.main;
+
+import ...
+
+@Component
+public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
+    
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+        //以下都只是我使用的部分设置
+        
+        //关闭CSRF防护
+        //如果不关闭，所有的POST请求都需要返回一个token才能访问到，这里暂时关闭
+		http.csrf().disable();
+		//设置访问权限
+		http.authorizeRequests()
+			.antMatchers("/admin").hasRole("ADMIN")//只有ADMIN可以访问
+			.antMatchers("/user").hasAnyRole("ADMIN","USER")//ADMIN或USER都可以访问
+			.antMatchers("/logout").authenticated()//登录后才能访问
+			.anyRequest().permitAll();//未被配置的路径，所有人都可以访问
+        //权限控制还可以通过access方法通过SpEL表达式来控制权限，如
+        //http.authorizeRequests().anyRequest().access("hasRole('USER') or hasRole('ADMIN')")
+
+        //启用默认的登录页面
+		http.formLogin()
+            .loginPage("/login")//设置登录页面，默认为/login
+            .loginProcessingUrl("/dologin")//设置登录请求的路径，我们也可以通过post直接请求通过这个路径来登录
+            //可以设置登录成功跳转的页面，传入一个AuthenticationSuccessHandler
+            //登录失败等页面同理
+            .successHandler(new AuthenticationSuccessHandler() {
+			@Override
+			public void onAuthenticationSuccess(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Authentication authentication) throws IOException, ServletException {
+                //通过writer打印一个success代表登录成功
+				PrintWriter writer = httpServletResponse.getWriter();
+				writer.write(new ObjectMapper().writeValueAsString("success"));
+				writer.flush();
+				writer.close();
+			}
+		});
+        //后面要改用我们自己的Controller控制登录，要关闭默认的登录
+		//http.formLogin().disable();
+        //同上
+		//http.logout().disable();
+
+		//设置登录后权限不足的页面
+		http.exceptionHandling().accessDeniedPage("/accessDenied");
+		//设置未登录时的页面
+		//LoginUrlAuthenticationEntryPoint是一个AuthenticationEntryPoint的实现类，可以定义登录页面，会自动重定向到登录页
+		AuthenticationEntryPoint authenticationEntryPoint = new LoginUrlAuthenticationEntryPoint("/login.html");
+		http.exceptionHandling().authenticationEntryPoint(authenticationEntryPoint);
+	}
+}
+```
+
+#### 通过注解
+
+##### @PreAuthorize
+
+- 被注释的方法在**执行前**会被检查是否有权限
+
+- 可以在任何方法，包括`@RequestMapping`注释的方法上，来限制请求
+
+- 参数为一个SpEL表达式
+
+- 如
+
+  - ```java
+    @PreAuthorize("#id<10")
+    public User find(int id) {
+    	System.out.println("find user by id........." + id);
+    	return null;
+    }
+    ```
+
+##### @PostAuthorize
+
+- 在方法**运行后**才进行权限检查，其他基本相同
+
+- 有一个`returnObject`来代表返回的结果
+
+- 如
+
+  - ```java
+    @PostAuthorize("returnObject.id%2==0")
+    public User find(int id) {
+        User user = new User();
+        user.setId(id);
+    	return user;
+    }
+    ```
+
+##### @PreFilter
+
+##### @PostFilter
+
+#### SpEL表达式配置权限
+
+| 方法                      | 含义                                           |
+| ------------------------- | ---------------------------------------------- |
+| `authentication()`        | 用户认证对象                                   |
+| `denyAll()`               | 拒绝任何访问                                   |
+| `hasAnyRole(String ... )` | 当前用户是否存在参数中列明的对象属性           |
+| `hasRole(String)`         | 当前用户是否存在角色                           |
+| `hasipAddress(String)`    | 是否请求来自指定的 IP                          |
+| `isAnonymous()`           | 是否匿名访问                                   |
+| `isAuthenticated()`       | 是否用户通过认证签名                           |
+| `isFullyAuthenticated()`  | 是否用户是完整验证，即非”记住我“功能通过的认证 |
+| `isRememberMe()`          | 是否是通过”记住我“功能通过的验证               |
+| `permitAll()`             | 无条件允许任何访问                             |
+| `principal()`             | 用户的 principal 对象                          |
+
+<center>Spring Security中的Spring表达式方法</center>
+
+### 通过自定义Controller进行用户验证
+
+> security的认证判断是通过authenticationManager去判断构造的UsernamePasswordToken，然后生成验证通过后Authentication，将这个Authentication放入SecurityContextHolder中即可实现认证。
+>
+> 可以在controller层直接注入authenticationManager
+>
+> 来自[spring security controller层实现登陆](https://blog.csdn.net/qq_34675369/article/details/91499798)
+
+​	我们先来看看用来验证我们的用户信息的`AuthenticationManager`接口
+
+**AuthenticationManager接口**
+
+- AuthenticationManager是一个接口，用来验证传入的`Authentication`
+
+- 他会验证**用户凭证**、是否被禁用，是否被锁定等等
+- 如果验证失败就抛出异常
+- 验证成功就返回一个完全经过身份验证的对象，包括凭据
+
+```java
+public interface AuthenticationManager {
+	Authentication authenticate(Authentication authentication) throws AuthenticationException;
+}
+```
+
+​	我们继续探究传入的`Authentication`，发现它也是一个接口，他有很多实现类：![image-20210224230302448](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210224230302448.png)
+
+​	最后一个实现类`UsernamePasswordAuthenticationToken`，他的说明：
+
+> An  link org.springframework.security.core.Authentication implementation that isdesigned for simple presentation of a username and password.
+
+​	大概是一个通过用户名和密码设计的简单实现类，他的其中一个构造函数就是通过账号密码为参数的。
+
+ 	所以我们通过账号密码就可以构建一个`Authentication`，之后把构建的类传入`AuthenticationManager`，进行验证，如果通过验证，就会返回一个身份对象，最后我们再将返回的身份对象放入`SecurityContextHolder`的`SecurityContext`中，就完成了用户的验证，并记录了用户的登录信息。
+
+​	通过以上，我们就完成了登录，所以我们现在只要获取到`AuthenticationManager`类就好了。发现在`WebSecurityConfigurerAdapte`中，也就是我们上文中的配置类，就有`AuthenticationManager`，所以我们只要将配置类的`AuthenticationManager`装配到Bean中即可，方法如下：
+
+**配置类**
+
+```java
+package com.studyspringboot.ch12.user.main;
+
+import ...
+
+@Component
+public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
+	...
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		...
+        //关闭默认的登录配置
+		http.formLogin().disable();
+		http.logout().disable();
+		...
+	}
+    //将AuthenticationManager装配到Bean中
+	@Bean
+	@Override
+	protected AuthenticationManager authenticationManager() throws Exception {
+		return super.authenticationManager();
+	}
+
+}
+```
+
+**Controller层**
+
+```java
+package com.studyspringboot.ch12.user.controller;
+
+import ...
+
+@Controller
+public class UserController {
+	...
+    //注入AuthenticationManager
+	@Autowired
+	private AuthenticationManager authenticationManager;
+    //登录
+    //JsonLogin为我自定义的类，保存了账户密码
+	@PostMapping("/login")
+	@ResponseBody
+	public String login(@RequestBody @Valid JsonLogin json){
+        //通过用户名密码创建一个token
+		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(json.getUsername(), json.getPassword());
+        //验证生成authenticate
+		Authentication authenticate = authenticationManager.authenticate(token);
+        //将authenticate放入SecurityContextHolder
+		SecurityContextHolder.getContext().setAuthentication(authenticate);
+		return "success";
+	}
+    //登出
+	@GetMapping("/logout")
+	@ResponseBody
+	public Map<String, Object>logout(){
+        //清除当前用户的上下文
+		SecurityContextHolder.clearContext();
+		return "success";
+	}
+}
+
+```
+
+### 关于CSRF
+
+关于csrf：[CSRF攻击与防御](https://blog.csdn.net/stpeace/article/details/53512283)
+
+​	我的实现是使用将随机的token放在cookie中传回，之后通过js在请求头加入我传入的token就可以在前后端分离的情况下完成POST请求
+
+```java
+package com.studyspringboot.ch12.user.main;
+
+import ...
+
+@Component
+public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
+    ...
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		...
+        //启用csrf，并将其设置为在cookie中传递
+		http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
+		...
+	}
+	...
+}
+```
+
+​	在完成了上述配置，我们访问页面后，它会多回传一个cookie，key为`XSRF-TOKEN`，如：![image-20210224232222520](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210224232222520.png)
+
+​	如果前端想要发送POST请求，就需要在请求头加入一个`X-XSRF-TOKEN`字段，字段值为cookie中的值，之后这个POST就可以响应了，也防止了CSRF攻击
+
+![image-20210224232428015](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210224232428015.png)
+
+### 获取登录的用户信息
+
+- 在Controller中可以在`Principal principal`参数中获取当前登录用户的信息
+- 如果用户登录，可以使用`getName()`方法获取用户名
+- 如果用户未登录，会返则是一个String类型，值为`"anonymousUser"`
+
+```java
+@GetMapping("/admin")
+@ResponseBody
+public MyUser admin(Principal principal){
+    //判断是否登录
+	if("anonymousUser".equals(principal)){
+		return null;
+	}
+    //通过getName方法获取用户名
+	MyUser user = service.findUserByName(principal.getName());
+	return user;
+}
+```
+
+### 记住我功能
+
+​	上面的登录是通过Session来记录用户的登录状态的，所以当用户关闭页面后，就要重新登录，是否不方便。而remember me可以解决这一问题。
+
+​	同样的
+
+### Spring Security探究
+
+## Spring Cloud
+
+## Spring Boot单元测试
+
+### 遇到的坑
+
+#### Test类无法加载自定义的配置文件
+
+原类中的`@PropertySource`路径要加`classpath`
