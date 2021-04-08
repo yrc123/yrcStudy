@@ -1,0 +1,1090 @@
+{
+	"_type": "Project",
+	"_id": "AAAAAAFF+h6SjaM2Hec=",
+	"name": "Untitled",
+	"ownedElements": [
+		{
+			"_type": "UMLModel",
+			"_id": "AAAAAAFF+qBWK6M3Z8Y=",
+			"_parent": {
+				"$ref": "AAAAAAFF+h6SjaM2Hec="
+			},
+			"name": "Model",
+			"ownedElements": [
+				{
+					"_type": "UMLClassDiagram",
+					"_id": "AAAAAAFF+qBtyKM79qY=",
+					"_parent": {
+						"$ref": "AAAAAAFF+qBWK6M3Z8Y="
+					},
+					"name": "Main",
+					"defaultDiagram": true
+				},
+				{
+					"_type": "FCFlowchart",
+					"_id": "AAAAAAF4jKRNZcNoE/Q=",
+					"_parent": {
+						"$ref": "AAAAAAFF+qBWK6M3Z8Y="
+					},
+					"name": "Flowchart1",
+					"ownedElements": [
+						{
+							"_type": "FCFlowchartDiagram",
+							"_id": "AAAAAAF4jKRNZsNp3oQ=",
+							"_parent": {
+								"$ref": "AAAAAAF4jKRNZcNoE/Q="
+							},
+							"name": "FlowchartDiagram1",
+							"ownedViews": [
+								{
+									"_type": "FCTerminatorView",
+									"_id": "AAAAAAF4jKSyo8NvXjg=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKRNZsNp3oQ="
+									},
+									"model": {
+										"$ref": "AAAAAAF4jKSyosNt9g4="
+									},
+									"subViews": [
+										{
+											"_type": "LabelView",
+											"_id": "AAAAAAF4jKSyo8NwGaA=",
+											"_parent": {
+												"$ref": "AAAAAAF4jKSyo8NvXjg="
+											},
+											"font": "Source Code Pro;16;0",
+											"left": 358,
+											"top": 130,
+											"width": 105.60023498535156,
+											"height": 16,
+											"text": "开始",
+											"wordWrap": true
+										}
+									],
+									"font": "Source Code Pro;16;0",
+									"left": 348,
+									"top": 120,
+									"width": 125.60023498535156,
+									"height": 36,
+									"nameLabel": {
+										"$ref": "AAAAAAF4jKSyo8NwGaA="
+									}
+								},
+								{
+									"_type": "FCDecisionView",
+									"_id": "AAAAAAF4jKTxDcN4nfI=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKRNZsNp3oQ="
+									},
+									"model": {
+										"$ref": "AAAAAAF4jKTxDMN2ap0="
+									},
+									"subViews": [
+										{
+											"_type": "LabelView",
+											"_id": "AAAAAAF4jKTxDcN5uEs=",
+											"_parent": {
+												"$ref": "AAAAAAF4jKTxDcN4nfI="
+											},
+											"font": "Source Code Pro;16;0",
+											"left": 316,
+											"top": 236,
+											"width": 128,
+											"height": 16,
+											"text": "是否是三角形",
+											"wordWrap": true
+										}
+									],
+									"font": "Source Code Pro;16;0",
+									"left": 252,
+									"top": 228,
+									"width": 256,
+									"height": 32,
+									"nameLabel": {
+										"$ref": "AAAAAAF4jKTxDcN5uEs="
+									}
+								},
+								{
+									"_type": "FCProcessView",
+									"_id": "AAAAAAF4jKYgX8OEKCM=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKRNZsNp3oQ="
+									},
+									"model": {
+										"$ref": "AAAAAAF4jKYgX8OCjec="
+									},
+									"subViews": [
+										{
+											"_type": "LabelView",
+											"_id": "AAAAAAF4jKYgYMOF50w=",
+											"_parent": {
+												"$ref": "AAAAAAF4jKYgX8OEKCM="
+											},
+											"font": "Source Code Pro;16;0",
+											"left": 46,
+											"top": 298,
+											"width": 211.20025634765625,
+											"height": 16,
+											"text": "输出非三角形NotATriangle",
+											"wordWrap": true
+										}
+									],
+									"font": "Source Code Pro;16;0",
+									"left": 36,
+									"top": 288,
+									"width": 231.20025634765625,
+									"height": 36,
+									"nameLabel": {
+										"$ref": "AAAAAAF4jKYgYMOF50w="
+									}
+								},
+								{
+									"_type": "FCFlowView",
+									"_id": "AAAAAAF4jKaLGMOWaGg=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKRNZsNp3oQ="
+									},
+									"model": {
+										"$ref": "AAAAAAF4jKaLF8OUMqE="
+									},
+									"subViews": [
+										{
+											"_type": "EdgeLabelView",
+											"_id": "AAAAAAF4jKaLGMOXJiE=",
+											"_parent": {
+												"$ref": "AAAAAAF4jKaLGMOWaGg="
+											},
+											"model": {
+												"$ref": "AAAAAAF4jKaLF8OUMqE="
+											},
+											"visible": false,
+											"font": "Source Code Pro;16;0",
+											"left": 419,
+											"top": 182,
+											"height": 16,
+											"alpha": 1.5707963267948966,
+											"distance": 15,
+											"hostEdge": {
+												"$ref": "AAAAAAF4jKaLGMOWaGg="
+											},
+											"edgePosition": 1
+										}
+									],
+									"font": "Source Code Pro;16;0",
+									"head": {
+										"$ref": "AAAAAAF4jKTxDcN4nfI="
+									},
+									"tail": {
+										"$ref": "AAAAAAF4jKSyo8NvXjg="
+									},
+									"lineStyle": 2,
+									"points": "405:155;405:228",
+									"nameLabel": {
+										"$ref": "AAAAAAF4jKaLGMOXJiE="
+									}
+								},
+								{
+									"_type": "FCFlowView",
+									"_id": "AAAAAAF4jKaOOMOf9oA=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKRNZsNp3oQ="
+									},
+									"model": {
+										"$ref": "AAAAAAF4jKaOOMOdL8U="
+									},
+									"subViews": [
+										{
+											"_type": "EdgeLabelView",
+											"_id": "AAAAAAF4jKaOOMOgJOI=",
+											"_parent": {
+												"$ref": "AAAAAAF4jKaOOMOf9oA="
+											},
+											"model": {
+												"$ref": "AAAAAAF4jKaOOMOdL8U="
+											},
+											"font": "Source Code Pro;16;0",
+											"left": 330,
+											"top": 312,
+											"width": 41.60002136230469,
+											"height": 16,
+											"alpha": 1.5707963267948966,
+											"distance": 15,
+											"hostEdge": {
+												"$ref": "AAAAAAF4jKaOOMOf9oA="
+											},
+											"edgePosition": 1,
+											"text": "A：否"
+										}
+									],
+									"font": "Source Code Pro;16;0",
+									"head": {
+										"$ref": "AAAAAAF4jKYgX8OEKCM="
+									},
+									"tail": {
+										"$ref": "AAAAAAF4jKTxDcN4nfI="
+									},
+									"lineStyle": 2,
+									"points": "351:259;351:305;266:305",
+									"nameLabel": {
+										"$ref": "AAAAAAF4jKaOOMOgJOI="
+									}
+								},
+								{
+									"_type": "FCDecisionView",
+									"_id": "AAAAAAF4jKa6esOtW4c=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKRNZsNp3oQ="
+									},
+									"model": {
+										"$ref": "AAAAAAF4jKa6esOrwCc="
+									},
+									"subViews": [
+										{
+											"_type": "LabelView",
+											"_id": "AAAAAAF4jKa6esOufAo=",
+											"_parent": {
+												"$ref": "AAAAAAF4jKa6esOtW4c="
+											},
+											"font": "Source Code Pro;16;0",
+											"left": 344,
+											"top": 356,
+											"width": 160,
+											"height": 16,
+											"text": "判断是否是等边三角形",
+											"wordWrap": true
+										}
+									],
+									"font": "Source Code Pro;16;0",
+									"left": 264,
+									"top": 348,
+									"width": 320,
+									"height": 32,
+									"nameLabel": {
+										"$ref": "AAAAAAF4jKa6esOufAo="
+									}
+								},
+								{
+									"_type": "FCProcessView",
+									"_id": "AAAAAAF4jKb/EMO3MJw=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKRNZsNp3oQ="
+									},
+									"model": {
+										"$ref": "AAAAAAF4jKb/EMO1BTY="
+									},
+									"subViews": [
+										{
+											"_type": "LabelView",
+											"_id": "AAAAAAF4jKb/EMO48QQ=",
+											"_parent": {
+												"$ref": "AAAAAAF4jKb/EMO3MJw="
+											},
+											"font": "Source Code Pro;16;0",
+											"left": 238,
+											"top": 562,
+											"width": 195.2001495361328,
+											"height": 16,
+											"text": "输出不等边三角形Scalene",
+											"wordWrap": true
+										}
+									],
+									"font": "Source Code Pro;16;0",
+									"left": 228,
+									"top": 552,
+									"width": 215.2001495361328,
+									"height": 36,
+									"nameLabel": {
+										"$ref": "AAAAAAF4jKb/EMO48QQ="
+									}
+								},
+								{
+									"_type": "FCProcessView",
+									"_id": "AAAAAAF4jKetMsPCNFI=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKRNZsNp3oQ="
+									},
+									"model": {
+										"$ref": "AAAAAAF4jKetMsPAdWc="
+									},
+									"subViews": [
+										{
+											"_type": "LabelView",
+											"_id": "AAAAAAF4jKetM8PDoXM=",
+											"_parent": {
+												"$ref": "AAAAAAF4jKetMsPCNFI="
+											},
+											"font": "Source Code Pro;16;0",
+											"left": 694,
+											"top": 394,
+											"width": 217.60023498535156,
+											"height": 16,
+											"text": "输出等边三角形Equilateral",
+											"wordWrap": true
+										}
+									],
+									"font": "Source Code Pro;16;0",
+									"left": 684,
+									"top": 384,
+									"width": 237.60023498535156,
+									"height": 36,
+									"nameLabel": {
+										"$ref": "AAAAAAF4jKetM8PDoXM="
+									}
+								},
+								{
+									"_type": "FCProcessView",
+									"_id": "AAAAAAF4jKfoTMPL87s=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKRNZsNp3oQ="
+									},
+									"model": {
+										"$ref": "AAAAAAF4jKfoTMPJuC0="
+									},
+									"subViews": [
+										{
+											"_type": "LabelView",
+											"_id": "AAAAAAF4jKfoTMPMnvg=",
+											"_parent": {
+												"$ref": "AAAAAAF4jKfoTMPL87s="
+											},
+											"font": "Source Code Pro;16;0",
+											"left": 478,
+											"top": 562,
+											"width": 198.4001922607422,
+											"height": 16,
+											"text": "输出等腰三角形Isosceles",
+											"wordWrap": true
+										}
+									],
+									"font": "Source Code Pro;16;0",
+									"left": 468,
+									"top": 552,
+									"width": 218.4001922607422,
+									"height": 36,
+									"nameLabel": {
+										"$ref": "AAAAAAF4jKfoTMPMnvg="
+									}
+								},
+								{
+									"_type": "FCDecisionView",
+									"_id": "AAAAAAF4jKhD7sPVSD4=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKRNZsNp3oQ="
+									},
+									"model": {
+										"$ref": "AAAAAAF4jKhD7sPTpUA="
+									},
+									"subViews": [
+										{
+											"_type": "LabelView",
+											"_id": "AAAAAAF4jKhD7sPWaeQ=",
+											"_parent": {
+												"$ref": "AAAAAAF4jKhD7sPVSD4="
+											},
+											"font": "Source Code Pro;16;0",
+											"left": 348,
+											"top": 452,
+											"width": 144,
+											"height": 16,
+											"text": "判断是否等腰三角形",
+											"wordWrap": true
+										}
+									],
+									"font": "Source Code Pro;16;0",
+									"left": 276,
+									"top": 444,
+									"width": 288,
+									"height": 32,
+									"nameLabel": {
+										"$ref": "AAAAAAF4jKhD7sPWaeQ="
+									}
+								},
+								{
+									"_type": "FCFlowView",
+									"_id": "AAAAAAF4jKiKGsPeCyc=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKRNZsNp3oQ="
+									},
+									"model": {
+										"$ref": "AAAAAAF4jKiKGsPccMo="
+									},
+									"subViews": [
+										{
+											"_type": "EdgeLabelView",
+											"_id": "AAAAAAF4jKiKGsPf8Kk=",
+											"_parent": {
+												"$ref": "AAAAAAF4jKiKGsPeCyc="
+											},
+											"model": {
+												"$ref": "AAAAAAF4jKiKGsPccMo="
+											},
+											"font": "Source Code Pro;16;0",
+											"left": 463,
+											"top": 390,
+											"width": 35.200042724609375,
+											"height": 16,
+											"alpha": 1.5707963267948966,
+											"distance": 15,
+											"hostEdge": {
+												"$ref": "AAAAAAF4jKiKGsPeCyc="
+											},
+											"edgePosition": 1,
+											"text": "C:是"
+										}
+									],
+									"font": "Source Code Pro;16;0",
+									"head": {
+										"$ref": "AAAAAAF4jKetMsPCNFI="
+									},
+									"tail": {
+										"$ref": "AAAAAAF4jKa6esOtW4c="
+									},
+									"lineStyle": 2,
+									"points": "480:379;480:413;684:413",
+									"nameLabel": {
+										"$ref": "AAAAAAF4jKiKGsPf8Kk="
+									}
+								},
+								{
+									"_type": "FCFlowView",
+									"_id": "AAAAAAF4jKiVy8PnfPc=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKRNZsNp3oQ="
+									},
+									"model": {
+										"$ref": "AAAAAAF4jKiVy8PlbDE="
+									},
+									"subViews": [
+										{
+											"_type": "EdgeLabelView",
+											"_id": "AAAAAAF4jKiVy8PoEfc=",
+											"_parent": {
+												"$ref": "AAAAAAF4jKiVy8PnfPc="
+											},
+											"model": {
+												"$ref": "AAAAAAF4jKiVy8PlbDE="
+											},
+											"font": "Source Code Pro;16;0",
+											"left": 390,
+											"top": 402,
+											"width": 41.60002136230469,
+											"height": 16,
+											"alpha": 1.5707963267948966,
+											"distance": 15,
+											"hostEdge": {
+												"$ref": "AAAAAAF4jKiVy8PnfPc="
+											},
+											"edgePosition": 1,
+											"text": "D：否"
+										}
+									],
+									"font": "Source Code Pro;16;0",
+									"head": {
+										"$ref": "AAAAAAF4jKhD7sPVSD4="
+									},
+									"tail": {
+										"$ref": "AAAAAAF4jKa6esOtW4c="
+									},
+									"lineStyle": 2,
+									"points": "396:379;396:444",
+									"nameLabel": {
+										"$ref": "AAAAAAF4jKiVy8PoEfc="
+									}
+								},
+								{
+									"_type": "FCFlowView",
+									"_id": "AAAAAAF4jKibvcPw2hY=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKRNZsNp3oQ="
+									},
+									"model": {
+										"$ref": "AAAAAAF4jKibvcPu7N8="
+									},
+									"subViews": [
+										{
+											"_type": "EdgeLabelView",
+											"_id": "AAAAAAF4jKibvsPxBpo=",
+											"_parent": {
+												"$ref": "AAAAAAF4jKibvcPw2hY="
+											},
+											"model": {
+												"$ref": "AAAAAAF4jKibvcPu7N8="
+											},
+											"font": "Source Code Pro;16;0",
+											"left": 617,
+											"top": 466,
+											"width": 35.200042724609375,
+											"height": 16,
+											"alpha": 1.5707963267948966,
+											"distance": 15,
+											"hostEdge": {
+												"$ref": "AAAAAAF4jKibvcPw2hY="
+											},
+											"edgePosition": 1,
+											"text": "F:是"
+										}
+									],
+									"font": "Source Code Pro;16;0",
+									"head": {
+										"$ref": "AAAAAAF4jKfoTMPL87s="
+									},
+									"tail": {
+										"$ref": "AAAAAAF4jKhD7sPVSD4="
+									},
+									"lineStyle": 2,
+									"points": "563:475;620:475;620:552",
+									"nameLabel": {
+										"$ref": "AAAAAAF4jKibvsPxBpo="
+									}
+								},
+								{
+									"_type": "FCFlowView",
+									"_id": "AAAAAAF4jKigscP5rdA=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKRNZsNp3oQ="
+									},
+									"model": {
+										"$ref": "AAAAAAF4jKigscP3Dl4="
+									},
+									"subViews": [
+										{
+											"_type": "EdgeLabelView",
+											"_id": "AAAAAAF4jKigssP6UZE=",
+											"_parent": {
+												"$ref": "AAAAAAF4jKigscP5rdA="
+											},
+											"model": {
+												"$ref": "AAAAAAF4jKigscP3Dl4="
+											},
+											"font": "Source Code Pro;16;0",
+											"left": 305,
+											"top": 504,
+											"width": 41.60002136230469,
+											"height": 16,
+											"alpha": 1.5707963267948966,
+											"distance": 15,
+											"hostEdge": {
+												"$ref": "AAAAAAF4jKigscP5rdA="
+											},
+											"edgePosition": 1,
+											"text": "E：否"
+										}
+									],
+									"font": "Source Code Pro;16;0",
+									"head": {
+										"$ref": "AAAAAAF4jKb/EMO3MJw="
+									},
+									"tail": {
+										"$ref": "AAAAAAF4jKhD7sPVSD4="
+									},
+									"lineStyle": 2,
+									"points": "311:475;311:552",
+									"nameLabel": {
+										"$ref": "AAAAAAF4jKigssP6UZE="
+									}
+								},
+								{
+									"_type": "FCAlternateProcessView",
+									"_id": "AAAAAAF4jKisS8QCEw0=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKRNZsNp3oQ="
+									},
+									"model": {
+										"$ref": "AAAAAAF4jKisSsQAitQ="
+									},
+									"subViews": [
+										{
+											"_type": "LabelView",
+											"_id": "AAAAAAF4jKisS8QDy5s=",
+											"_parent": {
+												"$ref": "AAAAAAF4jKisS8QCEw0="
+											},
+											"font": "Source Code Pro;16;0",
+											"left": 394,
+											"top": 658,
+											"width": 163.2003631591797,
+											"height": 16,
+											"text": "结束",
+											"wordWrap": true
+										}
+									],
+									"font": "Source Code Pro;16;0",
+									"left": 384,
+									"top": 648,
+									"width": 183.2003631591797,
+									"height": 36,
+									"nameLabel": {
+										"$ref": "AAAAAAF4jKisS8QDy5s="
+									}
+								},
+								{
+									"_type": "FCFlowView",
+									"_id": "AAAAAAF4jKjNZ8QLf/s=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKRNZsNp3oQ="
+									},
+									"model": {
+										"$ref": "AAAAAAF4jKjNZ8QJK44="
+									},
+									"subViews": [
+										{
+											"_type": "EdgeLabelView",
+											"_id": "AAAAAAF4jKjNaMQMhFo=",
+											"_parent": {
+												"$ref": "AAAAAAF4jKjNZ8QLf/s="
+											},
+											"model": {
+												"$ref": "AAAAAAF4jKjNZ8QJK44="
+											},
+											"visible": false,
+											"font": "Source Code Pro;16;0",
+											"left": 196,
+											"top": 642,
+											"height": 16,
+											"alpha": 1.5707963267948966,
+											"distance": 15,
+											"hostEdge": {
+												"$ref": "AAAAAAF4jKjNZ8QLf/s="
+											},
+											"edgePosition": 1
+										}
+									],
+									"font": "Source Code Pro;16;0",
+									"head": {
+										"$ref": "AAAAAAF4jKisS8QCEw0="
+									},
+									"tail": {
+										"$ref": "AAAAAAF4jKYgX8OEKCM="
+									},
+									"lineStyle": 2,
+									"points": "196:323;196:665;384:665",
+									"nameLabel": {
+										"$ref": "AAAAAAF4jKjNaMQMhFo="
+									}
+								},
+								{
+									"_type": "FCFlowView",
+									"_id": "AAAAAAF4jKjT4cQU1kM=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKRNZsNp3oQ="
+									},
+									"model": {
+										"$ref": "AAAAAAF4jKjT4MQS7Po="
+									},
+									"subViews": [
+										{
+											"_type": "EdgeLabelView",
+											"_id": "AAAAAAF4jKjT4cQVkoc=",
+											"_parent": {
+												"$ref": "AAAAAAF4jKjT4cQU1kM="
+											},
+											"model": {
+												"$ref": "AAAAAAF4jKjT4MQS7Po="
+											},
+											"visible": false,
+											"font": "Source Code Pro;16;0",
+											"left": 619,
+											"top": 672,
+											"height": 16,
+											"alpha": 1.5707963267948966,
+											"distance": 15,
+											"hostEdge": {
+												"$ref": "AAAAAAF4jKjT4cQU1kM="
+											},
+											"edgePosition": 1
+										}
+									],
+									"font": "Source Code Pro;16;0",
+									"head": {
+										"$ref": "AAAAAAF4jKisS8QCEw0="
+									},
+									"tail": {
+										"$ref": "AAAAAAF4jKfoTMPL87s="
+									},
+									"lineStyle": 2,
+									"points": "620:587;620:665;566:665",
+									"nameLabel": {
+										"$ref": "AAAAAAF4jKjT4cQVkoc="
+									}
+								},
+								{
+									"_type": "FCFlowView",
+									"_id": "AAAAAAF4jKjZocQdbKk=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKRNZsNp3oQ="
+									},
+									"model": {
+										"$ref": "AAAAAAF4jKjZoMQbatg="
+									},
+									"subViews": [
+										{
+											"_type": "EdgeLabelView",
+											"_id": "AAAAAAF4jKjZocQeWjI=",
+											"_parent": {
+												"$ref": "AAAAAAF4jKjZocQdbKk="
+											},
+											"model": {
+												"$ref": "AAAAAAF4jKjZoMQbatg="
+											},
+											"visible": false,
+											"font": "Source Code Pro;16;0",
+											"left": 350,
+											"top": 642,
+											"height": 16,
+											"alpha": 1.5707963267948966,
+											"distance": 15,
+											"hostEdge": {
+												"$ref": "AAAAAAF4jKjZocQdbKk="
+											},
+											"edgePosition": 1
+										}
+									],
+									"font": "Source Code Pro;16;0",
+									"head": {
+										"$ref": "AAAAAAF4jKisS8QCEw0="
+									},
+									"tail": {
+										"$ref": "AAAAAAF4jKb/EMO3MJw="
+									},
+									"lineStyle": 2,
+									"points": "350:587;350:665;384:665",
+									"nameLabel": {
+										"$ref": "AAAAAAF4jKjZocQeWjI="
+									}
+								},
+								{
+									"_type": "FCFlowView",
+									"_id": "AAAAAAF4jKjeVMQmrm0=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKRNZsNp3oQ="
+									},
+									"model": {
+										"$ref": "AAAAAAF4jKjeU8Qkh2Y="
+									},
+									"subViews": [
+										{
+											"_type": "EdgeLabelView",
+											"_id": "AAAAAAF4jKjeVMQn3i8=",
+											"_parent": {
+												"$ref": "AAAAAAF4jKjeVMQmrm0="
+											},
+											"model": {
+												"$ref": "AAAAAAF4jKjeU8Qkh2Y="
+											},
+											"visible": false,
+											"font": "Source Code Pro;16;0",
+											"left": 785,
+											"top": 672,
+											"height": 16,
+											"alpha": 1.5707963267948966,
+											"distance": 15,
+											"hostEdge": {
+												"$ref": "AAAAAAF4jKjeVMQmrm0="
+											},
+											"edgePosition": 1
+										}
+									],
+									"font": "Source Code Pro;16;0",
+									"head": {
+										"$ref": "AAAAAAF4jKisS8QCEw0="
+									},
+									"tail": {
+										"$ref": "AAAAAAF4jKetMsPCNFI="
+									},
+									"lineStyle": 2,
+									"points": "786:419;786:665;566:665",
+									"nameLabel": {
+										"$ref": "AAAAAAF4jKjeVMQn3i8="
+									}
+								},
+								{
+									"_type": "FCFlowView",
+									"_id": "AAAAAAF4jKjq3cQvA7U=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKRNZsNp3oQ="
+									},
+									"model": {
+										"$ref": "AAAAAAF4jKjq3cQtHMk="
+									},
+									"subViews": [
+										{
+											"_type": "EdgeLabelView",
+											"_id": "AAAAAAF4jKjq3cQwf30=",
+											"_parent": {
+												"$ref": "AAAAAAF4jKjq3cQvA7U="
+											},
+											"model": {
+												"$ref": "AAAAAAF4jKjq3cQtHMk="
+											},
+											"font": "Source Code Pro;16;0",
+											"left": 416,
+											"top": 294,
+											"width": 41.60002136230469,
+											"height": 16,
+											"alpha": 1.5707963267948966,
+											"distance": 15,
+											"hostEdge": {
+												"$ref": "AAAAAAF4jKjq3cQvA7U="
+											},
+											"edgePosition": 1,
+											"text": "B：是"
+										}
+									],
+									"font": "Source Code Pro;16;0",
+									"head": {
+										"$ref": "AAAAAAF4jKa6esOtW4c="
+									},
+									"tail": {
+										"$ref": "AAAAAAF4jKTxDcN4nfI="
+									},
+									"lineStyle": 2,
+									"points": "422:259;422:348",
+									"nameLabel": {
+										"$ref": "AAAAAAF4jKjq3cQwf30="
+									}
+								}
+							]
+						},
+						{
+							"_type": "FCTerminator",
+							"_id": "AAAAAAF4jKSyosNt9g4=",
+							"_parent": {
+								"$ref": "AAAAAAF4jKRNZcNoE/Q="
+							},
+							"name": "开始",
+							"ownedElements": [
+								{
+									"_type": "FCFlow",
+									"_id": "AAAAAAF4jKaLF8OUMqE=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKSyosNt9g4="
+									},
+									"source": {
+										"$ref": "AAAAAAF4jKSyosNt9g4="
+									},
+									"target": {
+										"$ref": "AAAAAAF4jKTxDMN2ap0="
+									}
+								}
+							]
+						},
+						{
+							"_type": "FCDecision",
+							"_id": "AAAAAAF4jKTxDMN2ap0=",
+							"_parent": {
+								"$ref": "AAAAAAF4jKRNZcNoE/Q="
+							},
+							"name": "是否是三角形",
+							"ownedElements": [
+								{
+									"_type": "FCFlow",
+									"_id": "AAAAAAF4jKaOOMOdL8U=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKTxDMN2ap0="
+									},
+									"name": "A：否",
+									"source": {
+										"$ref": "AAAAAAF4jKTxDMN2ap0="
+									},
+									"target": {
+										"$ref": "AAAAAAF4jKYgX8OCjec="
+									}
+								},
+								{
+									"_type": "FCFlow",
+									"_id": "AAAAAAF4jKjq3cQtHMk=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKTxDMN2ap0="
+									},
+									"name": "B：是",
+									"source": {
+										"$ref": "AAAAAAF4jKTxDMN2ap0="
+									},
+									"target": {
+										"$ref": "AAAAAAF4jKa6esOrwCc="
+									}
+								}
+							]
+						},
+						{
+							"_type": "FCProcess",
+							"_id": "AAAAAAF4jKYgX8OCjec=",
+							"_parent": {
+								"$ref": "AAAAAAF4jKRNZcNoE/Q="
+							},
+							"name": "输出非三角形NotATriangle",
+							"ownedElements": [
+								{
+									"_type": "FCFlow",
+									"_id": "AAAAAAF4jKjNZ8QJK44=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKYgX8OCjec="
+									},
+									"source": {
+										"$ref": "AAAAAAF4jKYgX8OCjec="
+									},
+									"target": {
+										"$ref": "AAAAAAF4jKisSsQAitQ="
+									}
+								}
+							]
+						},
+						{
+							"_type": "FCDecision",
+							"_id": "AAAAAAF4jKa6esOrwCc=",
+							"_parent": {
+								"$ref": "AAAAAAF4jKRNZcNoE/Q="
+							},
+							"name": "判断是否是等边三角形",
+							"ownedElements": [
+								{
+									"_type": "FCFlow",
+									"_id": "AAAAAAF4jKiKGsPccMo=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKa6esOrwCc="
+									},
+									"name": "C:是",
+									"source": {
+										"$ref": "AAAAAAF4jKa6esOrwCc="
+									},
+									"target": {
+										"$ref": "AAAAAAF4jKetMsPAdWc="
+									}
+								},
+								{
+									"_type": "FCFlow",
+									"_id": "AAAAAAF4jKiVy8PlbDE=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKa6esOrwCc="
+									},
+									"name": "D：否",
+									"source": {
+										"$ref": "AAAAAAF4jKa6esOrwCc="
+									},
+									"target": {
+										"$ref": "AAAAAAF4jKhD7sPTpUA="
+									}
+								}
+							]
+						},
+						{
+							"_type": "FCProcess",
+							"_id": "AAAAAAF4jKb/EMO1BTY=",
+							"_parent": {
+								"$ref": "AAAAAAF4jKRNZcNoE/Q="
+							},
+							"name": "输出不等边三角形Scalene",
+							"ownedElements": [
+								{
+									"_type": "FCFlow",
+									"_id": "AAAAAAF4jKjZoMQbatg=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKb/EMO1BTY="
+									},
+									"source": {
+										"$ref": "AAAAAAF4jKb/EMO1BTY="
+									},
+									"target": {
+										"$ref": "AAAAAAF4jKisSsQAitQ="
+									}
+								}
+							]
+						},
+						{
+							"_type": "FCProcess",
+							"_id": "AAAAAAF4jKetMsPAdWc=",
+							"_parent": {
+								"$ref": "AAAAAAF4jKRNZcNoE/Q="
+							},
+							"name": "输出等边三角形Equilateral",
+							"ownedElements": [
+								{
+									"_type": "FCFlow",
+									"_id": "AAAAAAF4jKjeU8Qkh2Y=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKetMsPAdWc="
+									},
+									"source": {
+										"$ref": "AAAAAAF4jKetMsPAdWc="
+									},
+									"target": {
+										"$ref": "AAAAAAF4jKisSsQAitQ="
+									}
+								}
+							]
+						},
+						{
+							"_type": "FCProcess",
+							"_id": "AAAAAAF4jKfoTMPJuC0=",
+							"_parent": {
+								"$ref": "AAAAAAF4jKRNZcNoE/Q="
+							},
+							"name": "输出等腰三角形Isosceles",
+							"ownedElements": [
+								{
+									"_type": "FCFlow",
+									"_id": "AAAAAAF4jKjT4MQS7Po=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKfoTMPJuC0="
+									},
+									"source": {
+										"$ref": "AAAAAAF4jKfoTMPJuC0="
+									},
+									"target": {
+										"$ref": "AAAAAAF4jKisSsQAitQ="
+									}
+								}
+							]
+						},
+						{
+							"_type": "FCDecision",
+							"_id": "AAAAAAF4jKhD7sPTpUA=",
+							"_parent": {
+								"$ref": "AAAAAAF4jKRNZcNoE/Q="
+							},
+							"name": "判断是否等腰三角形",
+							"ownedElements": [
+								{
+									"_type": "FCFlow",
+									"_id": "AAAAAAF4jKibvcPu7N8=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKhD7sPTpUA="
+									},
+									"name": "F:是",
+									"source": {
+										"$ref": "AAAAAAF4jKhD7sPTpUA="
+									},
+									"target": {
+										"$ref": "AAAAAAF4jKfoTMPJuC0="
+									}
+								},
+								{
+									"_type": "FCFlow",
+									"_id": "AAAAAAF4jKigscP3Dl4=",
+									"_parent": {
+										"$ref": "AAAAAAF4jKhD7sPTpUA="
+									},
+									"name": "E：否",
+									"source": {
+										"$ref": "AAAAAAF4jKhD7sPTpUA="
+									},
+									"target": {
+										"$ref": "AAAAAAF4jKb/EMO1BTY="
+									}
+								}
+							]
+						},
+						{
+							"_type": "FCAlternateProcess",
+							"_id": "AAAAAAF4jKisSsQAitQ=",
+							"_parent": {
+								"$ref": "AAAAAAF4jKRNZcNoE/Q="
+							},
+							"name": "结束"
+						}
+					]
+				}
+			]
+		}
+	]
+}
