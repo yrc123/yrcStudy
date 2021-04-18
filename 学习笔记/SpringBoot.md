@@ -108,6 +108,35 @@
 
 ### @ImportResource
 
+### @ControllerAdvice
+
+- @ExceptionHandler：用于捕获Controller中抛出的不同类型的异常，从而达到异常全局处理的目的
+- @InitBinder：用于请求中注册自定义参数的解析，从而达到自定义请求参数格式的目的
+- @ModelAttribute：表示此方法会在执行目标Controller方法之前执行 
+
+```java
+@ControllerAdvice
+public class MyControllerAdvice{
+    @ExceptionHandler(Exception.class)
+    public Object catchException(Exception e){
+        //对异常的处理
+        System.out.println("从Controller捕捉到异常")
+    }
+    //待补充
+    @InitBinder("b")
+	public void b(WebDataBinder binder) {
+    	binder.setFieldDefaultPrefix("b.");
+	}
+    @ModelAttribute(name = "model")
+    public Object getSomeThing{
+        /**
+         * 可以设定一些公共的数据，如UserDetails
+         * 之后在任何一个Controller的接口可以中加一个Model参数，就可获得
+        **/
+    }
+}
+```
+
 ### Spring EL
 
 #### ${...}
