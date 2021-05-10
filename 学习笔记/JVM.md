@@ -553,3 +553,74 @@ $$
 - 回收Region
   - 传统GC（如Shenandoah）：在并发回收的时候，转发需要知道**Brooks Pointer**，而由于**Brooks Pointer**保存在对象头中，**所以在并发索引更新完成之前，是不能将某个完成回收的的对象清理掉**。
   - ZGC：由于在指针有标记位，只要知道指针就可以知道是否要转发，这次访问将会被预置的内存屏障所截获，然后立即根据Region上的转发表记录将访问转发到新复制的对象上，并同时修正更新该引用的值，使其**直接指向新对象**，所以只有第一次访问旧对象会陷入转发，也就是**只慢一次**。而在**某个Region完成重分配后，就可以释放空间**，因为仅仅通过指针就可以知道对象是否要转发，通过转发表就知道要转发到哪里，而不要知道对象的具体信息。
+
+## 虚拟机执行子系统
+
+### 类文件结构
+
+#### Class类文件的结构
+
+> - 无符号数：**属于基本的数据类型**，以u1、u2、u4、u8来分别代表1个字节、2个字节、4个字节和8个字节的无符号数，无符号数可以用来描述数字、索引引用、数量值或者按照UTF-8编码构成字符串
+>   值。
+> - 表：**是由多个无符号数或者其他表作为数据项构成的复合数据类型**，为了便于区分，所有表的命名都习惯性地以“_info”结尾。表用于描述有层次关系的复合结构的数据，整个Class文件本质上也可以视作是一张表
+
+| 类型           | 名称                | 数量                  |
+| -------------- | ------------------- | --------------------- |
+| u4             | magic               | 1                     |
+| u2             | minor_version       | 1                     |
+| u2             | major_version       | 1                     |
+| u2             | constant_pool_count | 1                     |
+| cp_info        | constant_pool       | constant_pool_count-1 |
+| u2             | access_flags        | 1                     |
+| u2             | this_class          | 1                     |
+| u2             | super_class         | 1                     |
+| u2             | interfaces_count    | 1                     |
+| u2             | interfaces          | interfaces_count      |
+| u2             | fields_count        | 1                     |
+| field_info     | fields              | fields_count          |
+| u2             | methods_count       | 1                     |
+| method_info    | methods             | methods_count         |
+| u2             | attributes_count    | 1                     |
+| attribute_info | attributes          | attributes_count      |
+
+<center>Class文件格式</center>
+
+##### 结构示例
+
+- jdk版本：openjdk 15.0.2 2021-01-19
+- 编译代码：
+
+```java
+public class TestClass {
+    private int m;
+    public int inc() {
+        return m + 1;
+    }
+}
+```
+
+- Class文件：
+
+![image-20210510114508658](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210510114508658.png)
+
+**magic**
+
+![image-20210510112839729](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210510112839729.png)
+
+- 长度：4字节
+
+- 作用：魔数，用来标识当前文件是一个可以被虚拟机接受的文件。很多文件格式标准中都有使用魔数来进行身份识别的习惯，譬如GIF或者JPEG等在文件头中都存有魔数
+
+**minor_version**
+
+- 长度：2字节
+- 作用：标识Class文件**次版本号**。在一段时间内废弃，现在通过设置为65535来标识为启用了预览功能的Class文件
+
+**major_version**
+
+![image-20210510113453182](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210510113453182.png)
+
+- 长度：2字节
+- 作用：标识Class文件**主版本号**。当前使用jdk15，Class文件版本号为59（00 00 00 3B）
+
+**constant_pool_count**
