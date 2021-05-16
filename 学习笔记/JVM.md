@@ -615,7 +615,7 @@ public class TestClass {
 
 **minor_version**
 
-图
+![image-20210516193309646](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210516193309646.png)
 
 - 长度：2字节
 - 作用：标识Class文件**次版本号**。在一段时间内废弃，现在通过设置为65535来标识为启用了预览功能的Class文件
@@ -631,7 +631,7 @@ public class TestClass {
 
 **constant_pool_count**
 
-图
+![image-20210516193353519](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210516193353519.png)
 
 - 长度：2字节
 
@@ -639,12 +639,12 @@ public class TestClass {
 
 **constant_pool**
 
-图
+![](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210516194228190.png)
 
 - 长度：不定
 - 常量池主要包含**字面量**和**符号引用**。
   - 字面量：如文本字符串、被声明为final的常量值等。
-  - 符号引用：类和接口的全限定名、字段的名称和描述符、方法的名称和描述符等
+  - 符号引用：类和接口的**全限定名**、**字段的名称**和**描述符**、**方法的名称**和**描述符**等。[描述符](#描述符)
 
 - 截至JDK13，共有17种不同的常量，其中4种是后期加入的，为了支持动态语言调用。起始为一个u1的标志位，标志当前常量的类型
 
@@ -670,15 +670,88 @@ public class TestClass {
 
 <center>常量池标志表</center>
 
-​	细节查看书
+​	可以使用Class字节码文件分析工具：`javap`来分析常量表。使用`javap -verbose`来查看
+
+- 输出的结果：
+
+```
+  Last modified 2021年5月10日; size 353 bytes
+  SHA-256 checksum 8605de9615dedd01cecf93d3555a84e9daa456944c8fac979f1903aa1973894d
+  Compiled from "TestClass.java"
+public class TestClass
+  minor version: 0
+  major version: 59
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #8                          // TestClass
+  super_class: #2                         // java/lang/Object
+  interfaces: 0, fields: 1, methods: 2, attributes: 1
+Constant pool:
+   #1 = Methodref          #2.#3          // java/lang/Object."<init>":()V
+   #2 = Class              #4             // java/lang/Object
+   #3 = NameAndType        #5:#6          // "<init>":()V
+   #4 = Utf8               java/lang/Object
+   #5 = Utf8               <init>
+   #6 = Utf8               ()V
+   #7 = Fieldref           #8.#9          // TestClass.m:I
+   #8 = Class              #10            // TestClass
+   #9 = NameAndType        #11:#12        // m:I
+  #10 = Utf8               TestClass
+  #11 = Utf8               m
+  #12 = Utf8               I
+  #13 = Utf8               Code
+  #14 = Utf8               LineNumberTable
+  #15 = Utf8               LocalVariableTable
+  #16 = Utf8               this
+  #17 = Utf8               LTestClass;
+  #18 = Utf8               inc
+  #19 = Utf8               ()I
+  #20 = Utf8               SourceFile
+  #21 = Utf8               TestClass.java
+{
+  public TestClass();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         0: aload_0
+         1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+         4: return
+      LineNumberTable:
+        line 1: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   LTestClass;
+
+  public int inc();
+    descriptor: ()I
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=2, locals=1, args_size=1
+         0: aload_0
+         1: getfield      #7                  // Field m:I
+         4: iconst_1
+         5: iadd
+         6: ireturn
+      LineNumberTable:
+        line 5: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       7     0  this   LTestClass;
+}
+So
+```
+
+​	其他细节查看书
 
 ###### 访问标志
 
 **access_flags**
 
+![image-20210516194251923](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210516194251923.png)
+
 长度：2字节
 
-作用：标识类的信息
+作用：标识类的信息，当前为`0x0021`，`ACC_SUPER`和`ACC_PUBLIC`为真，代表当前类为public且在JDK1.0.2之后编译
 
 | 标志名称       | 标志值 | 含义                                                         |
 | -------------- | ------ | ------------------------------------------------------------ |
@@ -696,31 +769,29 @@ public class TestClass {
 
 **this_class**
 
-图
+![image-20210516194546590](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210516194546590.png)
 
 长度：2字节
 
-作用：确定这个类的全限定名
+作用：确定这个类的全限定名当前为`0x0008`，从上面的常量表中可以看出指向指向`#8 = Class #10 // TestClass`，即当前类
 
 **super_class**
 
-图
+![image-20210516195425474](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210516195425474.png)
 
 长度：2字节
 
-作用：确定这个类的父类的全限定名。父类索引只有一个，除了Object之外，所有的Java类都有父类，而Object的父类索引为0
+作用：确定这个类的父类的全限定名。父类索引只有一个，除了Object之外，所有的Java类都有父类，而Object的父类索引为0。当前为`0x0002`，指向`java/lang/Object`
 
 **interface_count**
 
-图
+![image-20210516195606739](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210516195606739.png)
 
 长度：2字节
 
-作用：接口计数器
+作用：接口计数器。当前为`0x0000`，因为没有实现任何接口
 
 **interface**
-
-图
 
 长度：不确定
 
@@ -730,11 +801,11 @@ public class TestClass {
 
 **fields_count**
 
-图
+![image-20210516195729107](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210516195729107.png)
 
 长度：2字节
 
-作用：字段计数器
+作用：字段计数器。当前为`0x0001`，代表只有一个字段，即`private int m;`
 
 **fields**
 
@@ -771,7 +842,7 @@ public class TestClass {
 - 全限定名
   - 将类全名中的`.`换成`/`，且结尾为`;`
   - 如对于类`com.demo.TestClass`的全限定名为`com/demo/TestClass;`
-- 描述符
+- <a id="描述符">描述符</a>
   - 用来描述字段的**数据类型**、**方法的参数列表**和**返回值**
   - 参数列表包括数量、类型以及顺序
   - **基本数据类型**以及代表无返回值的`void`类型都用一个大写字符来表示，而对象类型则用字符`L`加对象的全限定名来表示
@@ -797,14 +868,14 @@ public class TestClass {
 
 <center>描述字符含义</center>
 
-图
+![image-20210516201156146](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210516201156146.png)
 
 ​	在上图中，我们知道
 
 - fields_count为`0x0001`，代表只有一个字段
 - access_flag为`0x0002`，代表字段为私有的
-- name_index为`0x0005`，代表字段名，指向常量池中的第五个常量，值为`m`
-- descriptor_index为`0x0006`，代表描述字段，指向常量池的`I`
+- name_index为`0x000B`，代表字段名，指向常量池中的第五个常量，值为`m`
+- descriptor_index为`0x000C`，代表描述字段，指向常量池的`I`
 
 推出原代码定义为`private int m;`
 
