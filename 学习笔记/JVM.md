@@ -603,6 +603,8 @@ public class TestClass {
 
 ![image-20210510114508658](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210510114508658.png)
 
+###### 魔数和Class文件的版本
+
 **magic**
 
 ![image-20210510112839729](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210510112839729.png)
@@ -612,6 +614,8 @@ public class TestClass {
 - 作用：魔数，用来标识当前文件是一个可以被虚拟机接受的文件。很多文件格式标准中都有使用魔数来进行身份识别的习惯，譬如GIF或者JPEG等在文件头中都存有魔数
 
 **minor_version**
+
+图
 
 - 长度：2字节
 - 作用：标识Class文件**次版本号**。在一段时间内废弃，现在通过设置为65535来标识为启用了预览功能的Class文件
@@ -623,4 +627,189 @@ public class TestClass {
 - 长度：2字节
 - 作用：标识Class文件**主版本号**。当前使用jdk15，Class文件版本号为59（00 00 00 3B）
 
+###### 常量池
+
 **constant_pool_count**
+
+图
+
+- 长度：2字节
+
+- 作用：常量池计数值。容量计数是从1而不是0开始。当前值为22（00 16），代表常量池有21个常量，索引为1~21。0是有特殊含义：不引用任何一个常量池项目
+
+**constant_pool**
+
+图
+
+- 长度：不定
+- 常量池主要包含**字面量**和**符号引用**。
+  - 字面量：如文本字符串、被声明为final的常量值等。
+  - 符号引用：类和接口的全限定名、字段的名称和描述符、方法的名称和描述符等
+
+- 截至JDK13，共有17种不同的常量，其中4种是后期加入的，为了支持动态语言调用。起始为一个u1的标志位，标志当前常量的类型
+
+| 类别                             | 标志 | 描述                         |
+| -------------------------------- | ---- | ---------------------------- |
+| CONSTANT_Utf8_info               | 1    | UTF-8编码的字符串            |
+| CONSTANT_Integer_info            | 3    | 整型字面量                   |
+| CONSTANT_Float_info              | 4    | 浮点型字面量                 |
+| CONSTANT_Long_info               | 5    | 长整型字面量                 |
+| CONSTANT_Double_info             | 6    | 双精度浮点型字面量           |
+| CONSTANT_Class_info              | 7    | 类或接口的符号引用           |
+| CONSTANT_String_info             | 8    | 字符串类型字面量             |
+| CONSTANT_Fieldref_info           | 9    | 字段的符号引用               |
+| CONSTANT_Methodref_info          | 10   | 类中方法的符号引用           |
+| CONSTANT_InterfaceMethodref_info | 11   | 接口中方法的符号引用         |
+| CONSTANT_NameAndType_info        | 12   | 字段或方法的部分符号引用     |
+| CONSTANT_MethodHandle_info       | 15   | 表示方法句柄                 |
+| CONSTANT_MethodType_info         | 16   | 表示方法类型                 |
+| CONSTANT_Dynamic_info            | 17   | 表示一个动态计算常量         |
+| CONSTANT_InvokeDynamic_info      | 18   | 表示一个动态方法调用点       |
+| CONSTANT_Module_info             | 19   | 表示一个模块                 |
+| CONSTANT_Package_info            | 20   | 表示一个模块中开放或导出的包 |
+
+<center>常量池标志表</center>
+
+​	细节查看书
+
+###### 访问标志
+
+**access_flags**
+
+长度：2字节
+
+作用：标识类的信息
+
+| 标志名称       | 标志值 | 含义                                                         |
+| -------------- | ------ | ------------------------------------------------------------ |
+| ACC_PUBLIC     | 0x0001 | 是否为public                                                 |
+| ACC_INAL       | 0x0010 | 是否为final，只有类可设置                                    |
+| ACC_SUPER      | 0x0020 | 是否允许invokespecial字节码的新语义，在JDK1.0.2后，invokespecial语义发生变化，所有JDK1.0.2后的class此位为真 |
+| ACC_INTERFACE  | 0x0200 | 标识这是一个接口                                             |
+| ACC_ABSTRACT   | 0x0400 | 是否为abstract类型                                           |
+| ACC_SYNTHETIC  | 0x1000 | 标志这个类并非为用户代码生成                                 |
+| ACC_ANNOTATION | 0x2000 | 标识这是一个注解                                             |
+| ACC_ENUM       | 0x4000 | 标识这是一个枚举                                             |
+| ACC_MODULE     | 0x8000 | 标识这是一个模块                                             |
+
+###### 类索引、父类索引和接口索引集合
+
+**this_class**
+
+图
+
+长度：2字节
+
+作用：确定这个类的全限定名
+
+**super_class**
+
+图
+
+长度：2字节
+
+作用：确定这个类的父类的全限定名。父类索引只有一个，除了Object之外，所有的Java类都有父类，而Object的父类索引为0
+
+**interface_count**
+
+图
+
+长度：2字节
+
+作用：接口计数器
+
+**interface**
+
+图
+
+长度：不确定
+
+作用：是一组u2类型的数据的集合。些被实现的接口将按implements关键字后的接口顺序从左到右排列在接口索引集合中。
+
+###### 字段表集合
+
+**fields_count**
+
+图
+
+长度：2字节
+
+作用：字段计数器
+
+**fields**
+
+长度：不确定
+
+作用：字段表，类型为`fild_info`。字段包括**类级变量**以及**实例级变量**，但**不包括在方法内部声明的局部变量**
+
+**fild_info**
+
+| 类型           | 名称             | 数量             |
+| -------------- | ---------------- | ---------------- |
+| u2             | access_flags     | 1                |
+| u2             | name_index       | 1                |
+| u2             | descriptor_index | 1                |
+| u2             | attributes_count | 1                |
+| attribute_info | attributes       | attributes_count |
+
+<center>表字段结构</center>
+
+| 标志名称      | 标志值 | 含义                     |
+| ------------- | ------ | ------------------------ |
+| ACC_PUBIC     | 0x0001 | 字段是否public           |
+| ACC_PRIVATE   | 0x0002 | 字段是否private          |
+| ACC_PROTECTED | 0x0004 | 字段是否protected        |
+| ACC_STATIC    | 0x0008 | 字段是否static           |
+| ACC_FINAL     | 0x0010 | 字段是否final            |
+| ACC_VOLATILE  | 0x0040 | 字段是否vaolatile        |
+| ACC_TRANSIENT | 0x0080 | 字段是否transient        |
+| ACC_SYNTHETIC | 0x1000 | 字段是否由编译器自动产生 |
+| ACC_ENUM      | 0x4000 | 字段是否enum             |
+
+<center>字段访问标志</center>
+
+- 全限定名
+  - 将类全名中的`.`换成`/`，且结尾为`;`
+  - 如对于类`com.demo.TestClass`的全限定名为`com/demo/TestClass;`
+- 描述符
+  - 用来描述字段的**数据类型**、**方法的参数列表**和**返回值**
+  - 参数列表包括数量、类型以及顺序
+  - **基本数据类型**以及代表无返回值的`void`类型都用一个大写字符来表示，而对象类型则用字符`L`加对象的全限定名来表示
+  - 对于数组类型，每一个维度用一个`[`描述，如`java.lang.String[][]`为`[[Ljava/lang/String;`，`int[]`为`[I`
+  - 对于方法，按照先参数列表、后返回值的顺序描述，参数列表按照参数的**严格顺序**放在一组小括号之内。如`void inc()`为`()V`，`int indexOf(char[] source, int sourceOffset, int sourceCount, char[] target, int targetOffset)`为`([CII[CI)I`
+
+- 简单名称
+  - 简单名称则就是指没有类型和参数修饰 的方法或者字段名称
+  - 如`inc()`方法和`m`字段的简单名称分别就是`inc`和`m`
+
+| 标识字符 | 含义                            |
+| -------- | ------------------------------- |
+| B        | byte                            |
+| C        | char                            |
+| D        | double                          |
+| F        | float                           |
+| I        | int                             |
+| J        | long                            |
+| S        | short                           |
+| Z        | boolean                         |
+| V        | void                            |
+| L        | 对象类型，如`Ljava/lang/Object` |
+
+<center>描述字符含义</center>
+
+图
+
+​	在上图中，我们知道
+
+- fields_count为`0x0001`，代表只有一个字段
+- access_flag为`0x0002`，代表字段为私有的
+- name_index为`0x0005`，代表字段名，指向常量池中的第五个常量，值为`m`
+- descriptor_index为`0x0006`，代表描述字段，指向常量池的`I`
+
+推出原代码定义为`private int m;`
+
+​	字段表集合中**不会**列出从父类或者父接口中**继承而来的字段**，但有可能出现原本Java代码之中不存在的字段，譬如在内部类中**为了保持对外部类的访问性**，编译器就会自动添加**指向外部类实例的字段**
+
+​	在Java语言中字段是**无法重载**的，两个字段的数据类型、修饰符不管是否相同，都必须使用**不一样的名称**，但是对于Class文件格式来讲，只要两个字段的描述符**不是完全相同**，那字段重名就是**合法**的。
+
+###### 方法表集合
