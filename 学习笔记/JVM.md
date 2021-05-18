@@ -151,7 +151,7 @@
 
 - 如果一个对象具有软引用，内存空间足够，垃圾回收器就不会回收它。
 - 在系统将要发生内存溢出异常前，会把被软引用的对象列进回收范围之中进行第二次回收。
-- 软引用可用来实现内存敏感的高速缓存,比如网页缓存、图片缓存等。
+- 软引用可用来实现内存敏感的高速缓存，比如网页缓存、图片缓存等。
 
 #### 弱引用|Weak Reference
 
@@ -884,3 +884,83 @@ So
 ​	在Java语言中字段是**无法重载**的，两个字段的数据类型、修饰符不管是否相同，都必须使用**不一样的名称**，但是对于Class文件格式来讲，只要两个字段的描述符**不是完全相同**，那字段重名就是**合法**的。
 
 ###### 方法表集合
+
+- *方法表结构*和*字段结构***一致**
+- *方法访问标志*和*字段访问标志***类似**
+
+| 标志名称         | 标志值 | 含义                               |
+| ---------------- | ------ | ---------------------------------- |
+| ACC_PUBIC        | 0x0001 | 方法是否public                     |
+| ACC_PRIVATE      | 0x0002 | 方法是否private                    |
+| ACC_PROTECTED    | 0x0004 | 方法是否protected                  |
+| ACC_STATIC       | 0x0008 | 方法是否static                     |
+| ACC_FINAL        | 0x0010 | 方法是否final                      |
+| ACC_SYNCHRONIZED | 0x0020 | 方法是否sychronized                |
+| ACC_BRIDGE       | 0x0040 | 方法是否由编译器自动产生的桥接方法 |
+| ACC_VARARGS      | 0x0080 | 方法是否接受不定参数               |
+| ACC_NATIVE       | 0x0100 | 方法是否native                     |
+| ACC_ABSTRACT     | 0x0400 | 方法是否abstract                   |
+| ACC_STRICT       | 0x0800 | 方法是否strictfp                   |
+| ACC_SYNTHETIC    | 0x1000 | 方法是否编译器自动产生             |
+
+<center>方法访问标志</center>
+
+- 方法的代买再**属性表集合**中的`Code`属性中，而不在**方法表集合**中
+
+- 如果父类方法在子类中**没有被重写**，方法表集合中就**不会**有来自父类方法的信息
+
+- 在Java中，**重载**的要求是
+
+  1. 有相同的简单名称
+  2. 有一个与原方法不同的特征签名
+
+  特征签名是一个方法中**各个参数**在常量池中的字段符号引用的集合，不包含返回值。而Class文件格式中的特征签名包含了返回值，所以事实上只有返回值不同是可以在Class文件中共存。
+
+###### 属性表集合
+
+​	属性表和其他表相比，比较宽松，可以不用严格顺序，而且只要不与规定的属性名重名，编译器都可以写入自定义的属性。在Java SE 12中，预定义属性名已经增加到29项。
+
+| 属性名称                             | 使用位置                     | 含义                                                         |
+| ------------------------------------ | ---------------------------- | ------------------------------------------------------------ |
+| Code                                 | 方法表                       | Java代码编译成的字节码指令                                   |
+| ConstantValue                        | 字段表                       | 由final关键字定义的常量值                                    |
+| Deprecated                           | 类、方法表、字段表           | 被声明为deprecated的方法和字段                               |
+| Exceptions                           | 方法表                       | 方法抛出的异常列表                                           |
+| EnclosingMethod                      | 类文件                       | 当一个类为局部类或匿名类时有这个属性，用于标记这个类的外围方法 |
+| InnerClasses                         | 类文件                       | 内部类列表                                                   |
+| LineNumberTable                      | Code属性                     | Java源码的行号和字节码指令对应的关系                         |
+| LocalVariableTable                   | Code属性                     | 方法的局部变量描述                                           |
+| stackMapTable                        | Code属性                     | JDK6中新增的属性，供新的类型检查验证器( Type Checker)检查和处理目标方法的局部变量和操作数栈所需要的类型是否匹配 |
+| Signature                            | 类、方法表、字段表           | JDK5中新增的属性，用于支持范型情况下的方法签名。在Java语言中，任何类、接口、初始化方法或成员的泛型签名如果包含了类型变量(TypeVariables)或参数化类型( Parameterized Types)，则Signature属性会为它记录泛型签名信息。由于Java的范型采用擦除法实现，为了避免类型信息被擦除后导致签名混乱，需要这个属性记录范型中的相关信息 |
+| SourceFile                           | 类文件                       | 记录源文件名称                                               |
+| SourceDebugExtension                 | 类文件                       | JDK5中新增的属性，用于存储额外的调试信息。譬如在进行JSP文件调试时，无法通过Java堆栈来定位到JSP文件的行号，JSR45提案为这些非Java语言编写，却需要编译成字节码并运行在Java虚拟机中的程序提供了一个进行调试的标准机制，使用该属性就可以用于存储这个标准所新加入的调试信息 |
+| Synthetic                            | 类、方法表、字段表           | 标识方法或字段为编译器自动生成                               |
+| LocalVariableTypeTable               | 类                           | JDK5中新增的属性,它使用特征签名代替描述符,是为了引入泛型语法之后能描述泛型参数化类型而添加 |
+| RuntimeVisibleAnnotations            | 类、方法表、字段表           | JDK5中新增的属性,为动态注解提供支持。该属性用于指明哪些注解是运行时(实际上运行时就是进行反射调用)可见的 |
+| RuntimeInvisibleAnnotations          | 类、方法表、字段表           | JDK5中新增的属性，用于指明哪些注解是运行时不可见的           |
+| RuntimeVisibleParameterAnnotations   | 方法表                       | JDK5中新增的属性,作用与 Runtime visibleAnnotations属性类似,只不过作用对象为方法参数 |
+| RuntimeInvisibleParameterAnnotations | 方法表                       | 同上                                                         |
+| AnnotationDefault                    | 方法表                       | JDK5中新增的属性,用于记录注解类元素的默认值                  |
+| BootstrapMethods                     | 类文件                       | JDK7中新增的属性,用于保存invokedynamic指令引用的引导方法限定符 |
+| RuntimeVisibleTypeAnnotations        | 类、方法表、字段表、Code属性 | JDK8中新增的属性,为实现JSR308中新增的类型注解提供的支持,用于指明哪些类注解是运行时(实际上运行时就是进行反射调用)可见的 |
+| RuntimeInvisibleTypeAnnotations      | 类、方法表、字段表、Code属性 | JDK8中新增的属性,为实现JSR308中新增的类型注解提供的支持,与 Runtime Visible TypeAnnotations属性作用刚好相反,用于指明哪些注解是运行时不可见的 |
+| MethodParameters                     | 方法表                       | JDK8中新增的属性,用于支持(编译时加上parameters参数)将方法名称编译进 Class件中,并可运行时获取。此前要获取方法名称(典型的如IDE的代码提示)只能通过 Java Doc中得到 |
+| Moduls                               | 类                           | JDK9中新增的属性,用于记录一个 Module的名称以及相关信息( requires、 exports、 opens、usesprovides |
+| ModulePackages                       | 类                           | JDK9中新增的属性,用于记录一个模块中所有被exports或者 opens的包 |
+| ModuleMainClass                      | 类                           | JDK9中新增的属性,用于指定一个模块的主类                      |
+| NestHost                             | 类                           | JDK11中新增的属性,用于支持嵌套类(Java中的内部类)的反射和访问控制的API,一个内部类通过该属性得知自己的宿主类 |
+| NestMembers                          | 类                           | JDK11中新增的属性,用于支持嵌套类(Java中的内部类)的反射和访问控制的API.一个宿主类通过该属性得知自己有哪些内部类 |
+
+<center>虚拟机规范定义的属性</center>
+
+- 属性名从常量池中引用
+
+| 类型 | 名称                 | 数量             |
+| ---- | -------------------- | ---------------- |
+| u2   | attribute_name_index | 1                |
+| u4   | attribute_length     | 1                |
+| u1   | info                 | attribute_length |
+
+<center>属性表结构</center>
+
+**Code属性**
