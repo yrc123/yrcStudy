@@ -672,7 +672,7 @@ public class TestClass {
 
 ​	可以使用Class字节码文件分析工具：`javap`来分析常量表。使用`javap -verbose`来查看
 
-- 输出的结果：
+- <a id="汇编指令">输出的结果</a>：
 
 ```
   Last modified 2021年5月10日; size 353 bytes
@@ -977,3 +977,82 @@ So
 <center>属性表结构</center>
 
 **Code属性**
+
+不是所有方法都有Code属性，如接口和抽象类的方法就不存在Code属性。Code属性用来存储字节码指令。
+
+| 类型           | 名称                   | 数量                   |
+| -------------- | ---------------------- | ---------------------- |
+| u2             | attribute_name_index   | 1                      |
+| u4             | attribute_length       | 1                      |
+| u2             | max_statck             | 1                      |
+| u2             | max_locals             | 1                      |
+| u4             | code_length            | 1                      |
+| u1             | code                   | code_length            |
+| u2             | exception_table_length | 1                      |
+| exception_info | exception_table        | exception_table_length |
+| u2             | attributes_count       | 1                      |
+| attribute_info | attributes             | attributes_count       |
+
+<center>Code属性表的结构</center>
+
+​	正如上面的[方法表结构实例](#方法表结构实例)中的Code属性，attribute_name_index是指向常量池是索引，为`Code`，，attribute_length指示了属性值的长度，由于属性名称索引与属性长度一共为 6个字节，所以属性值的长度固定为整个属性表长度减去6个字节。
+
+**max_stack**
+
+- 长度：2字节
+- 作用：代表了操作数栈深度的最大值
+
+**max_locals**
+
+- 长度：2字节
+- 作用：记录了局部变量所需的空间，单位为**变量槽**。
+  - 变量槽为局部变量分配内存的**最小单位**，不超过32位的数据类型占用**一个**变量槽，而如double、long等占用64位的变量占用**两个**变量槽。
+  - 如方法参数、实例方法中的`this`、显式异常处理程序的参数（try-catch中catch中定义的异常）、方法体中定义的局部变量都与啦局部变量表来存放
+  - 编译器会**重用变量槽**，当代码超出变量的作用域时，这个变量占用的变量槽可以给别的变量使用。所以变量槽一般都比变量所需的变量槽少
+
+**code_length**
+
+- 长度：4字节
+- 作用：记录字节码长度。虽然理论上可以到达$2^{32}$，但是规范中明确限制了一个方法不允许超过65535条字节码指令，就是实际只使用了2字节。
+
+**code**
+
+- 长度：不确定
+- 作用：存储编译后生成的字节码指令
+  - 从`javap`处理出的[汇编指令](#汇编指令)中发现，无论是`inc()`还是`<init>()`，`Args_size`的值都为1，尽管他们两个都是无参函数。
+  - 因为在任何**实例方法**中，都有一个`this`来指向当前实例，虚拟机调用方法时会自动传入此参数，同时编译器也会留出一个变量槽来存放`this`，所以实例方法至少有一个指向当前实例的局部变量。
+  - 如果方法为**静态方法**，就没有`this`，`Args_size`也为实际传入的参数数量。
+
+**exception_table_length**
+
+- 长度：2字节
+- 作用：代表异常表集合长度
+
+**exception_table**
+
+- 长度：不确定
+- 作用：异常处理表
+
+| 类型 | 名称       | 数量 |
+| ---- | ---------- | ---- |
+| u2   | start_pc   | 1    |
+| u2   | end_pc     | 1    |
+| u2   | handler_pc | 1    |
+| u2   | catch_type | 1    |
+
+**Exceptions属性**
+
+| 类型 | 名称                  | 数量                 |
+| ---- | --------------------- | -------------------- |
+| u2   | attribute_name_index  | 1                    |
+| u4   | attribute_length      | 1                    |
+| u2   | number_of_exceptions  | 1                    |
+| u2   | exception_index_table | number_of_exceptions |
+
+- 这里的Exceptions属性是在方法表中与Code属性平级的一项属性
+- Exceptions属性的作用是列举出方法中可能抛出的受查异常，也就是方法描述时在throws关键字后面列举的异常
+
+**number_of_exceptions**
+
+- 表示可能抛出的异常种类
+- 每种异常使用一个exception_index_table表示，其为一个指向常量池中的索引，代表受查异常的类型
