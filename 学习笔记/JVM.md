@@ -1032,6 +1032,8 @@ So
 
 - 长度：不确定
 - 作用：异常处理表
+- ]在JDK 1.4.2之前的Javac编译器采用了jsr和ret指令实现finally语句，但1.4.2之后已经改为编译器在每段分支之后都将finally语句块的内容冗余生成一遍来实现。
+- 从JDK 7起，已经完全禁止Class文件中出现jsr和ret指令，如果遇到这两条指令，虚拟机会在类加载的字节码校验阶段抛出异常
 
 | 类型 | 名称       | 数量 |
 | ---- | ---------- | ---- |
@@ -1056,3 +1058,61 @@ So
 
 - 表示可能抛出的异常种类
 - 每种异常使用一个exception_index_table表示，其为一个指向常量池中的索引，代表受查异常的类型
+
+| 类型              | 名称                  | 数量                 |
+| ----------------- | --------------------- | -------------------- |
+| u2                | attribute_name_index  | 1                    |
+| u4                | attribute_length      | 1                    |
+| u2                | number_of_exceptions  | 1                    |
+| linde_number_info | exception_index_table | number_of_exceptions |
+
+<center>Exceptions属性结构</center>
+
+**LineNumberTable属性**
+
+- 性用于描述Java源码行号与字节码行号（字节码的偏移量）之间的对应关系
+- 不是运行时必需的属性
+- 调试时的断点、抛出异常时显示行号都依赖这个属性
+
+| 类型             | 名称                 | 数量 |
+| ---------------- | -------------------- | ---- |
+| u2               | attribute_name_index | 1    |
+| u4               | attribute_length     | 1    |
+| u2               | line_number_table    |      |
+| line_number_info |                      |      |
+
+<center>LineNumberTable属性结构</center>
+
+**LocalVariableTable属性**
+
+- LocalVariableTable属性用于描述栈帧中局部变量表的变量与Java源码中定义的变量之间的关系
+- 不是运行时必需的属性
+- 如果没有生成这项属性，当其他人引用这个方法时，所有的参数名称都将会丢失。譬IDE将会使用如arg0、arg1之类的占位符代替原有的参数名。且在调试期间无法根据参数名称从上下文中获得参数值
+
+| 类型                | 名称                        | 数量                        |
+| ------------------- | --------------------------- | --------------------------- |
+| u2                  | attribute_name_index        | 1                           |
+| u4                  | attribute_length            | 1                           |
+| u2                  | local_variable_table_length | 1                           |
+| local_variable_info | local_variable_table        | local_variable_table_length |
+
+<center>LocalVariableTable属性表结构</center>
+
+| 类型 | 名称             | 数量 |
+| ---- | ---------------- | ---- |
+| u2   | start_pc         | 1    |
+| u2   | length           | 1    |
+| u2   | name_index       | 1    |
+| u2   | descriptor_index | 1    |
+| u2   | index            | 1    |
+
+<center>local_variable_info项目结构</center>
+
+**LocalVariableTypeTable属性**
+
+- 在JDK 5引入泛型之后，加入了LocalVariableTypeTable属性
+- 这个属性结构与LocalVariableTable很相似，仅仅是把记录的字段描述
+  符的descriptor_index替换成了字段的特征签名（Signature）。对于非泛型类型来说，描述符和特征签名
+  能描述的信息是能吻合一致的，但是泛型引入之后，由于描述符中泛型的参数化类型被擦除掉[3]，描
+  述符就不能准确描述泛型类型了。因此出现了LocalVariableTypeTable属性，使用字段的特征签名来完
+  成泛型的描述。
