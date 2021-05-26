@@ -1032,7 +1032,7 @@ So
 
 - 长度：不确定
 - 作用：异常处理表
-- ]在JDK 1.4.2之前的Javac编译器采用了jsr和ret指令实现finally语句，但1.4.2之后已经改为编译器在每段分支之后都将finally语句块的内容冗余生成一遍来实现。
+- 在JDK 1.4.2之前的Javac编译器采用了jsr和ret指令实现finally语句，但1.4.2之后已经改为编译器在每段分支之后都将finally语句块的内容冗余生成一遍来实现。
 - 从JDK 7起，已经完全禁止Class文件中出现jsr和ret指令，如果遇到这两条指令，虚拟机会在类加载的字节码校验阶段抛出异常
 
 | 类型 | 名称       | 数量 |
@@ -1074,14 +1074,16 @@ So
 - 不是运行时必需的属性
 - 调试时的断点、抛出异常时显示行号都依赖这个属性
 
-| 类型             | 名称                 | 数量 |
-| ---------------- | -------------------- | ---- |
-| u2               | attribute_name_index | 1    |
-| u4               | attribute_length     | 1    |
-| u2               | line_number_table    |      |
-| line_number_info |                      |      |
+| 类型             | 名称                 | 数量                     |
+| ---------------- | -------------------- | ------------------------ |
+| u2               | attribute_name_index | 1                        |
+| u4               | attribute_length     | 1                        |
+| u2               | line_number_table    | 1                        |
+| line_number_info | line_number_table    | line_number_table_length |
 
 <center>LineNumberTable属性结构</center>
+
+- line_number_info：包含start_pc和line_number两个u2类型的数据项，前者是字节码行号，后者是Java源码行号
 
 **LocalVariableTable属性**
 
@@ -1108,11 +1110,325 @@ So
 
 <center>local_variable_info项目结构</center>
 
+- start_pc与length：代表局部变量的生命周期开始的字节码偏移量和其作用范围覆盖 的长度，两者代表了变量的作用域
+
+- name_index：指向常量池，代表名称
+- descriptor_index：指向常量池，代表描述符
+- index：这个局部变量在栈帧的局部变量表中变量槽的位置。当这个变量数据类型是64位类型时，它占用的变量槽为index和index+1两个。
+
 **LocalVariableTypeTable属性**
 
 - 在JDK 5引入泛型之后，加入了LocalVariableTypeTable属性
-- 这个属性结构与LocalVariableTable很相似，仅仅是把记录的字段描述
-  符的descriptor_index替换成了字段的特征签名（Signature）。对于非泛型类型来说，描述符和特征签名
-  能描述的信息是能吻合一致的，但是泛型引入之后，由于描述符中泛型的参数化类型被擦除掉[3]，描
-  述符就不能准确描述泛型类型了。因此出现了LocalVariableTypeTable属性，使用字段的特征签名来完
-  成泛型的描述。
+- 这个属性结构与LocalVariableTable很相似，仅仅是把记录的字段描述符的descriptor_index替换成了字段的特征签名
+- 非泛型类型的**描述符**和**特征签名**能描述的信息是能吻合一致的，但是泛型引入之后，由于描述符中泛型的参数化类型被**擦除**掉，描述符就不能准确描述泛型类型了
+- 因此出现了LocalVariableTypeTable属性，使用字段的特征签名来完成泛型的描述。
+
+**SourceFile**
+
+- SourceFile属性用于记录生成这个Class文件的源码文件名称
+- 对于大多数的类来说，类名和文件名是一致的，但是有一些特殊情况（如内部类）例外
+- 如果不生成这项属性，当抛出异常时，堆栈 中将不会显示出错代码所属的文件名
+
+| 类型 | 名称                 | 数量 |
+| ---- | -------------------- | ---- |
+| u2   | attribute_name_index | 1    |
+| u4   | attribute_length     | 1    |
+| u2   | sourcefile_index     | 1    |
+
+- sourcefile_index：指向常量池，代表文件名
+
+**SourceDebugExtension**
+
+- 为了方便在编译器和动态生成的Class中加入供程序员使用的自定义内容
+- SourceDebugExtension属性用于存储额外的代码调试信息
+- 典型的场景是在进行JSP文件调试时，无法 通过Java堆栈来定位到JSP文件的行号
+
+| 类型 | 名称                               | 数量 |
+| ---- | ---------------------------------- | ---- |
+| u2   | attribute_name_index               | 1    |
+| u4   | attribute_length                   | 1    |
+| u1   | debug_extension[attributte_length] | 1    |
+
+**ConstantValue属性**
+
+- ConstantValue属性的作用是通知虚拟机自动为**静态变量**赋值
+- 对非`static`类型的变量的赋值是在实例构造器`<init>()`方法中进行的
+- 而对于类变量，则有两种方式可以选择：在类构造器`<clinit>()`方法中或者使用ConstantValue属性
+
+- 如果同时使用`final`和`static`来修饰一个变量，并且这个变量的数据类型是**基本类型**或者**java.lang.String**的话，就将会生成ConstantValue属性来进行初始化
+- 如果这个变量没有被`final`修饰，或者**并非基本类型及字符串**，则将会选择在`<clinit>()`方法中进行初始化
+- 因为Class中常量池只有**基本类型**和**字符串**，而ConstantValue只能指向常量池，所以ConstantValue属性想支持别的类型也无能为力。
+
+| 类型 | 名称                 | 数量 |
+| ---- | -------------------- | ---- |
+| u2   | attribute_name_index | 1    |
+| u4   | attribute_length     | 1    |
+| u2   | constantvalue_index  | 1    |
+
+- 它的attribute_length数据项值必须固定为2
+
+- constantvalue_index：指向常量池，代表初始化的值
+
+**InnerClasses属性**
+
+- InnerClasses属性用于记录内部类与宿主类之间的关联
+- 如果一个类中定义了内部类，那编译器将会为它以及它所包含的内部类生成InnerClasses属性
+
+| 类型               | 名称                 | 数量              |
+| ------------------ | -------------------- | ----------------- |
+| u2                 | attribute_name_index | 1                 |
+| u4                 | attribute_length     | 1                 |
+| u2                 | number_of_classes    | 1                 |
+| inner_classes_info | inner_classes        | number_of_classes |
+
+<center>InnerClasses属性结构</center>
+
+- number_of_classes：代表需要记录多少个内部类信息，每一个内部类的信息都由一个inner_classes_info表进行描述
+
+| 类型 | 名称                     | 数量 |
+| ---- | ------------------------ | ---- |
+| u2   | inner_class_info_index   | 1    |
+| u2   | outer_class_info_index   | 1    |
+| u2   | inner_name_index         | 1    |
+| u2   | inner_class_access_flags | 1    |
+
+<center>inner_classes_info表的结构</center>
+
+- inner_class_info_inde：指向常量池中CONSTANT_Class_info型常量的索引，代表内部类的符号引用
+- outer_class_info_index：指向常量池中CONSTANT_Class_info型常量的索引，代表外部类的符号引用
+- inner_name_index：指向常量池，代表内部类名称
+- inner_class_access_flags：是内部类的访问标志，类似于类的access_flags
+
+| 标志名称       | 标志值 | 含义                           |
+| -------------- | ------ | ------------------------------ |
+| ACC_PUBLIC     | 0x0001 | 内部类是否为public             |
+| ACC_PRIVATE    | 0x0002 | 内部类是否为private            |
+| ACC_PROTECTED  | 0x0004 | 内部类是否为protected          |
+| ACC_SATATIC    | 0x0008 | 内部类是否为static             |
+| ACC_FINAL      | 0x0010 | 内部类是否为final              |
+| ACC_INTERFACE  | 0x0020 | 内部类是否为接口               |
+| ACC_ABSTRACT   | 0x0400 | 内部类是否为abstract           |
+| ACC_SYNTHETIC  | 0x1000 | 内部类是否为并非由用户代码产生 |
+| ACC_ANNOTATION | 0x2000 | 内部类是否为一个注解           |
+| ACC_ENUM       | 0x4000 | 内部类是否为一个枚举           |
+
+<center>inner_class_access_flags标志</center>
+
+**Deprecated属性**
+
+- 属于标志类型的布尔属性，只存在有和没有的区别
+- 用于表示某个类、字段或者方法，已经被程序作者定为不再推荐使用
+- 可以通过代码中使用`@Deprecated`注解进行设置
+
+| 类型 | 名称                 | 数量 |
+| ---- | -------------------- | ---- |
+| u2   | attribute_name_index | 1    |
+| u4   | attribute_length     | 1    |
+
+- 其中attribute_length数据项的值必须为0x00000000，因为没有任何属性值需要设置
+
+**Synthetic属性**
+
+- 属于标志类型的布尔属性，只存在有和没有的区别
+- 代表此字段或者方法并不是由Java源码直接产生的，而是由编译器自行添加的
+- JDK 5之后，标识一个类、字段或者方法是编译器自动产生的，也可以设置它们访问标志中的ACC_SYNTHETIC标志位
+
+- 属性结构同上
+
+**StackMapTable属性**
+
+- 这个属性会在虚拟机类加载的字节码验证阶段被新类型检查验证器使用，目的在于代替以前比较消耗性能的基于数据流分析的 类型推导验证器
+
+- 位于Code属性的属性表中
+
+**Signature属性**
+
+- Signature属性就是为了弥补，Java中使用**擦除法**实现的伪泛型，导致反射时无法获得泛型信息等问题而增设的
+- 因为Java语言的泛型采用的是擦除法实现的伪泛型，字节码（Code属性）中所有的泛型信息编译（类型变量、参数化类型）在编译之后都通通被擦除掉。使用擦除法的好处是实现简单（主要修改 Javac编译器，虚拟机内部只做了很少的改动）、非常容易实现Backport，运行期也能够节省一些类型所占的内存空间。但坏处是运行期就无法像C#等有真泛型支持的语言那样，将泛型类型与用户定义的 普通类型同等对待，例如运行期做反射时无法获得泛型信息。
+
+| 类型 | 名称                 | 数量 |
+| ---- | -------------------- | ---- |
+| u2   | attribute_name_index | 1    |
+| u4   | attribute_length     | 1    |
+| u2   | signature_index      | 1    |
+
+- signature_index：指向常量池的CONSTANT_Utf8_info结构，表示类签名或方法类型签名或字段类型签名。
+
+**BootstrapMethods属性**
+
+- 这个属性用于保存invokedynamic指令引用的引导方法限定符
+
+**MethodParameters属性**
+
+- MethodParameters的作用是记录方法的各个形参名称和信息
+- MethodParameters是在JDK 8时新加入到Class文件格式中的
+
+**模块化相关属性**
+
+- JDK 9的一个重量级功能是Java的模块化功能
+
+**运行时注解相关属性**
+
+- 为了存储源码中注解信息，Class文件同步增加了RuntimeVisibleAnnotations、RuntimeInvisibleAnnotations、RuntimeVisibleParameterAnnotations和RuntimeInvisibleParameterAnnotations四个属性
+- 到了JDK 8时期，进一步加强了Java语言的注解使用范围，又新增类型注解 （JSR 308），所以Class文件中也同步增加了RuntimeVisibleTypeAnnotations和RuntimeInvisibleTypeAnnotations两个属性
+
+| 类型       | 名称                 | 数量            |
+| ---------- | -------------------- | --------------- |
+| u2         | attribute_name_index | 1               |
+| u4         | attribute_length     | 1               |
+| u2         | num_annotations      | 1               |
+| annotation | annotations          | num_annotations |
+
+<center>RuntimeVisibleAnnotations属性结构</center>
+
+- RuntimeVisibleAnnotations是一个变长属性，它记录了类、字段或方法的声明上记录运行时可见注解，当我们使用反射API来获取类、字段或方法上的注解时，返回值就是通过这个属性来取到的。
+
+| 类型               | 名称                    | 数量                    |
+| ------------------ | ----------------------- | ----------------------- |
+| u2                 | type_index              | 1                       |
+| u2                 | num_element_value_pairs | 1                       |
+| element_value_pair | element_value_pairs     | num_element_value_pairs |
+
+<center>annotation属性结构</center>
+
+- type_index：指向常量池CONSTANT_Utf8_info常量的索引值，该常量应以字段描述符的形式表示一个注解
+- element_value_pairs：每 个元素都是一个键值对，代表该注解的参数和值
+
+#### 字节码指令简介
+
+- 由于Java虚拟机采用 面向操作数栈而不是面向寄存器的架构，所以大多数指令都不包含操作数，只有一个操作码，指令参数都存放在操作数栈中
+
+- 由于限制了Java虚拟机操作码的长度为一个字节（即0～255），这意味着指令集的操作码总数不能够超过256条
+
+##### 字节码与数据类型
+
+- 大多数指令都包含其操作所对应的**数据类型信息**，如`iload`指令用于从局部变量表中加载`int`型的数据到操作数栈中，而`fload`指令加载的则是`float`类型的数据
+
+| 数据类型  | 特殊字符 |
+| --------- | -------- |
+| long      | l        |
+| short     | s        |
+| byte      | b        |
+| char      | c        |
+| float     | f        |
+| double    | d        |
+| reference | r        |
+
+<center>特殊字符表</center>
+
+- 因为Java虚拟机的操作码长度只有一字节，无法将所有数据类型的操作都包含进去，即并非每种数据类型和每一种操作都有对应的指令
+- 如果在表中指令模板与数据类型两列共同确定的格为**空**，则说明虚拟机**不支持**对这种数据类型执行这项操作。
+- 如load指令有操作int类型的iload，但是**没有**操作byte类型的同类指令
+
+![image-20210526132231325](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210526132231325.png)
+
+<center>Java虚拟机指令集所支持的数据类型</center>
+
+- 编译器会在编译期或运行期将byte和short类型的数据带符号扩展（Sign-Extend）为相应的int类型数据，其他类型也类似
+
+##### 加载和存储指令
+
+| 操作作用                             | 字节码指令                                                   |
+| ------------------------------------ | ------------------------------------------------------------ |
+| 将一个局部变量加载到操作栈           | iload<br />iload\_\<n\><br />lload<br />lload\_\<n\><br />fload<br />fload\_\<n\><br />dload<br/>dload\_\<n\><br />aload<br />aload\_\<n\> |
+| 将一个数值从操作数栈存储到局部变量表 | istore<br />istore\_\<n\><br />lstore<br />lstore\_\<n\><br />fstore<br/>fstore\_\<n\><br />dstore<br />dstore\_\<n\><br />astore<br />astore\_\<n\> |
+| 将一个常量加载到操作数栈             | bipush<br />sipush<br />ldc<br />ldc_w<br />ldc2_w<br />aconst_null<br />iconst_m1<br/>iconst\_\<i\><br />lconst\_\<l\><br />fconst\_\<f\><br />dconst\_\<d\> |
+| 扩充局部变量表的访问索引的指令       | wid                                                          |
+
+- 有一部分是以尖括号结尾的，如`iload_<n>`。这些指令助记符实际上代表了一组指令，如例如`iload_<n>`，它代表了`iload_0`、`iload_1`、`iload_2`和`iload_3`这几条指令
+- 这几组指令都是某个带有一个操作数的通用指令的特殊形式，对于这几组特殊指令，它们省略掉了**显式**的操作数，**不需要**进行取操作数的动作，因为实际上操作数就隐含在指令中
+- 例如`iload_0`的语义与操作数为0时的`iload`指令 语义完全一致
+
+##### 运算指令
+
+| 操作作用         | 字节码指令                                               |
+| ---------------- | -------------------------------------------------------- |
+| 加法指令         | iadd<br />ladd<br />fadd<br />dadd                       |
+| 减法指令         | isub<br />lsub<br />fsub<br />dsub                       |
+| 乘法指令         | imul<br />lmul<br />fmul<br />dmul                       |
+| 除法指令         | idiv<br />ldiv<br />fdiv<br />ddiv                       |
+| 求余指令         | irem<br />lrem<br />frem<br />drem                       |
+| 取反指令         | ineg<br />lneg<br />fneg<br />dneg                       |
+| 位移指令         | ishl<br />ishr<br />iushr<br />lshl<br />lshr<br />lushr |
+| 按位或指令       | ior<br />lor                                             |
+| 按位与指令       | iand<br />land                                           |
+| 按位异或指令     | ixor<br />lxor                                           |
+| 局部变量自增指令 | iinc                                                     |
+| 比较指令         | dcmpg<br />dcmpl<br />fcmpg<br />fcmpl<br />lcmp         |
+
+- 数据运算可能会导致溢出
+- 只有**除法指令**以及**求余指令**中当出现除数为零时会导致 虚拟机抛出ArithmeticException异常，其余任何整型数运算场景都**不应该抛出运行时异常**
+
+##### 类型转换指令
+
+| 操作作用     | 字节码指令                                                   |
+| ------------ | ------------------------------------------------------------ |
+| 宽化类型转换 | 无须显式的转换指令                                           |
+| 窄化类型转换 | i2b<br />i2c<br />i2s<br />l2i<br />f2i<br />f2l<br />d2i<br />d2l<br />d2f |
+
+##### 对象创建与访问指令
+
+- 虽然类实例和数组都是对象，但Java虚拟机对类实例和数组的创建与操作使用了不同的字节码指令
+
+| 操作作用                                                 | 字节码指令                                                   |
+| -------------------------------------------------------- | ------------------------------------------------------------ |
+| 创建类实例的指令                                         | new                                                          |
+| 创建数组的指令                                           | newarray<br />anewarray<br />multianewarray                  |
+| 访问类字段（static字段）和实例字段（非static字段）的指令 | getfield<br />putfield<br />getstatic<br />putstatic         |
+| 把一个数组元素加载到操作数栈的指令                       | baload<br />caload<br />saload<br />iaload<br />laload<br />faload<br/>daload<br />aaload |
+| 将一个操作数栈的值储存到数组元素中的指令                 | bastore<br />castore<br />sastore<br />iastore<br />fastore<br/>dastore<br />aastore |
+| 取数组长度的指令                                         | arraylength                                                  |
+| 检查类实例类型的指令                                     | instanceof<br />checkcast                                    |
+
+##### 操作数栈管理指令
+
+| 操作作用                                                   | 字节码指令                                                   |
+| ---------------------------------------------------------- | ------------------------------------------------------------ |
+| 将操作数栈的栈顶一个或两个元素出栈                         | pop<br />pop2                                                |
+| 复制栈顶一个或两个数值并将复制值或双份的复制值重新压入栈顶 | dup<br />dup2<br />dup_x1<br/>dup2_x1<br />dup_x2<br />dup2_x2 |
+| 将栈最顶端的两个数值互换                                   | swap                                                         |
+
+##### 控制转移指令
+
+| 操作作用     | 字节码指令                                                   |
+| ------------ | ------------------------------------------------------------ |
+| 条件分支     | ifeq<br />iflt<br />ifle<br />ifne<br />ifgt<br />ifge<br />ifnull<br />ifnonnull<br />if_icmpeq<br />if_icmpne<br />if_icmplt<br/>if_icmpgt<br />if_icmple<br />if_icmpge<br />if_acmpeq<br />if_acmpne |
+| 复合条件分支 | tableswitch<br />lookupswitch                                |
+| 无条件分支   | goto<br />goto_w<br />jsr<br />jsr_w<br />ret                |
+
+##### 方法调用和返回指令
+
+| 字节码指令      | 操作作用                                       |
+| --------------- | ---------------------------------------------- |
+| invokevirtual   | 用于调用对象的实例方法                         |
+| invokeinterface | 用于调用接口方法                               |
+| invokespecial   | 用于调用一些需要特殊处理的实例方法             |
+| invokestatic    | 用于调用类静态方法                             |
+| invokedynamic   | 用于在运行时动态解析出调用点限定符所引用的方法 |
+
+##### 异常处理指令
+
+- 而在Java虚拟机中，处理异常不是由字节码指令来实现的（很久之前曾经使用jsr和 ret指令来实现，现在已经不用了），而是采用异常表来完成
+
+##### 同步指令
+
+- Java虚拟机支持**方法级**的同步和**方法内部一段指令序列**的同步
+- 方法级同步
+  - 方法级的同步是隐式的，无须通过字节码指令来控制，它实现在方法调用和返回操作之中
+  - 虚拟机可以从方法常量池中的方法表结构中的`ACC_SYNCHRONIZED`访问标志得知一个方法是否被声明为 同步方法
+  - 如果是同步方法，执行线程就要求先**成功持有管程**，然后才能执行方法，最后当方法完成时释放管程
+  - 如果一个同步方法执行期间抛出了异常，并且在方法内部无法处理此异常，那这个同步方法所持有的管程将在异常抛到**同步方法边界之外**时自动释放
+- 方法内部一段指令序列同步
+  - 同步一段指令集序列通常是由Java语言中的`synchronized`语句块来表示的
+  - Java虚拟机的指令集中有`monitorenter`和`monitorexit`两条指令来支持`synchronized`关键字的语义
+  - 每条`monitorenter`指令都**必须**有其对应的`monitorexit`指令
+  - 为了保证在方法异常完成时`monitorenter`和`monitorexit`指令可以正确配对，编译器会**自动产生一个异常处理程序**，这个程序可处理**所有**的异常，它的目的就是用来执行`monitorexit`指令
+
+| 操作作用 | 字节码指令   |
+| -------- | ------------ |
+| 开始同步 | monitorenter |
+| 退出同步 | monitorexit  |
+
+
+
+​	
