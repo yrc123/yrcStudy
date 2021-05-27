@@ -1429,6 +1429,18 @@ So
 | 开始同步 | monitorenter |
 | 退出同步 | monitorexit  |
 
+### 虚拟机类加载机制
 
+![类的生命周期](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210527104218160.png)
 
-​	
+<center>类的生命周期</center>
+
+#### 类加载的时机
+
+类初始化**有且仅有**在下列六种情况下会发生
+
+- 遇到`new`、`getstatic`、`putstatic`或`invokestatic`这四条字节码指令时，如果类型没有进行过初始化，则需要先触发其初始化阶段。以下代码能生成这四条指令
+  - 使用`new`实例化类
+  - 读取或设置一个类型的静态字段。因为被`final`修饰的静态、jvm支持的基础类型是在**常量池**中，所以不会触发类的初始化
+- 
+
