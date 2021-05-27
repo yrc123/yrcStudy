@@ -1435,12 +1435,73 @@ So
 
 <center>类的生命周期</center>
 
+​	加载、验证、准备、初始化和卸载这五个阶段的顺序是确定的，类型的加载过程必须按照这种顺序按部就班地**开始**（是开始，而不是完成，这些阶段通常都是互相交叉地混合进行的），而**解析阶段**则不一定：它在某些情况下可以在**初始化阶段之后**再开始， 这是为了支持Java语言的运行时绑定特性（也称为**动态绑定**或**晚期绑定**）。
+
 #### 类加载的时机
 
-类初始化**有且仅有**在下列六种情况下会发生
+类初始化**有且仅有**在下列六种情况下会发生：
 
 - 遇到`new`、`getstatic`、`putstatic`或`invokestatic`这四条字节码指令时，如果类型没有进行过初始化，则需要先触发其初始化阶段。以下代码能生成这四条指令
   - 使用`new`实例化类
   - 读取或设置一个类型的静态字段。因为被`final`修饰的静态、jvm支持的基础类型是在**常量池**中，所以不会触发类的初始化
-- 
+  - 调用一个类的静态方法时
+- 使用`java.lang.reflect`包的方法对类型进行反射调用，如果类型没有进行过初始化，则需要先触发其初始化阶段。
+- 当初始化类的时候，如果发现其父类还没有进行过初始化，则需要先触发其父类的初始化。
+- 当虚拟机启动时，虚拟机会先初始化主类，即包含`main()`方法的类
+- 当使用JDK 7新加入的动态语言支持时，如果一个`java.lang.invoke.MethodHandle`实例最后的解析结果为`REF_getStatic`、`REF_putStatic`、`REF_invokeStatic`、`REF_newInvokeSpecial`四种类型的方法句柄，并且这个方法句柄对应的类没有进行过初始化，则需要先触发其初始化。
+- 当一个接口中定义了JDK 8新加入的默认方法（被`default`关键字修饰的接口方法）时，如果有这个接口的**实现类**发生了初始化，那该接口要在其之前被初始化。
 
+以上六种场景被称为**主动引用**，只用主动引用会触发类初始化。而**被动引用**则不会触发初始化。
+
+##### 被动引用的例子
+
+```java
+package com.demo.loading;
+public class SuperClasss{
+    static{
+        System.out.println("SuperClass init!");
+    }
+    public static int value = 123;
+}
+public class SubClass extends SuperClass{
+    static{
+        System.out.println("SubClass init!");
+    }
+}
+public class Main{
+    /**
+     * 子类调用父类的静态字段
+     * 不会触发子类的初始化
+     **/
+    public static void main(String[] args){
+        System.out.println(SubClass.value);
+    }
+}
+```
+
+​	上述代码执行后，**只会触发父类的初始化**。对于静态字段，只有**直接定义这个字段的类**才会被初始化，因此通过其子类来引用父类中定义的静态字段，只会触发 父类的初始化而不会触发子类的初始化。
+
+```java
+package com.demo.loading;
+public class Main{
+    /**
+     * 通过数组定义来引用类
+     * 不会触发类的初始化
+     **/
+    public static void main(String[] args){
+        SuperClass[] sca = new SuperClass[10];
+    }
+}
+```
+
+​	在类文件中我们知道，与类的实例化不同，数组是通过`newarray`字节指令来创建的。实际上，在实例化数组时，虚拟机会**自动生成**一个直接继承于`java.lang.Object`的子类。
+
+​	在这个例子中，初始化的不是`com.demo.loading.SuperClass`，而是`[Lcom.demo.loading.SuperClass`，这也是为什么Java中访问数组比较安全，越界时会抛出异常而不会造成内存的非法访问
+
+
+
+
+
+
+
+反射和动态语言
