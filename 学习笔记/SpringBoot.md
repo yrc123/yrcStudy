@@ -2470,11 +2470,61 @@ public MyUser admin(Principal principal){
 
 ​	上面的登录是通过Session来记录用户的登录状态的，所以当用户关闭页面后，就要重新登录，是否不方便。而remember me可以解决这一问题。
 
-​	同样的
-
-### Spring Security探究
-
 ## Spring Cloud
+
+配置
+
+@LoadBalance
+
+开启负载均衡，默认提供轮询负载均衡算法
+
+负载均衡的其他算法
+
+### Ribbon
+
+DiscoveryClient
+
+RestTemplate
+
+
+
+### Feign
+
+@FeignClient
+
+### Hystrix
+
+@HystrixCommand
+
+@FeignClient集成Hystrix
+
+### Zuul
+
+@EnableZuulProxy
+
+自带熔断
+
+ZuulFallbackProvider
+
+接口 异常处理
+
+ZuulFilter
+
+接口 过滤器
+
+#### 遇到问题
+
+出现`Load balancer does not have available server for client`
+
+原因：idea maven默认导入的spring cloud不兼容
+
+@SpringCloudApplication
+
+启用spring boot应用、开发服务发现和断路器功能
+
+## REST风格
+
+@PathVariable
 
 ## Spring Boot单元测试
 
