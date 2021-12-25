@@ -488,7 +488,7 @@ process_cpu_usage< bool process_cpu_usage
 
 ![image-20210719104750145](https://gitee.com/lin_haoran/Picgo/raw/master/img/image-20210719104750145.png)
 
-## <a id="Spring Boot自定义指标">Spring Boot自定义指标</a>
+## <a id="Spring Boot自定义指标">Spring Boot自定义Metrics</a>
 
 ### 概述
 
